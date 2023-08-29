@@ -384,7 +384,9 @@ private fun TopAppBar(onBackPress: () -> Unit) {
             )
         }
         Spacer(Modifier.weight(1f))
-        IconButton(onClick = { /* TODO */ }) {
+        IconButton(onClick = {
+            // TODO : viewModel.addSomething()
+        }) {
             Icon(
                 imageVector = Icons.Default.PlaylistAdd,
                 contentDescription = stringResource(R.string.cd_add)
