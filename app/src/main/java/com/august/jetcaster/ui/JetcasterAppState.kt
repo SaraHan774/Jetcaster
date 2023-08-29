@@ -21,6 +21,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +60,7 @@ class JetcasterAppState(
         private set
 
     fun refreshOnline() {
+        Log.d("refreshOnline()", "refreshOnline: Hello World")
         isOnline = checkIfOnline()
     }
 
