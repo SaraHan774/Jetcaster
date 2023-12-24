@@ -19,6 +19,7 @@ package com.august.jetcaster
 import android.app.Application
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import timber.log.Timber
 
 /**
  * Application which sets up our dependency [Graph] with a context.
@@ -26,6 +27,7 @@ import coil.ImageLoaderFactory
 class JetcasterApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
+        setupTimber()
         Graph.provide(this)
     }
 
@@ -34,5 +36,9 @@ class JetcasterApplication : Application(), ImageLoaderFactory {
             // Disable `Cache-Control` header support as some podcast images disable disk caching.
             .respectCacheHeaders(false)
             .build()
+    }
+
+    private fun setupTimber() {
+        Timber.plant(JetCasterTree())
     }
 }
