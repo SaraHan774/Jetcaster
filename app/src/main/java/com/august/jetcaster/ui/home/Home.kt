@@ -143,14 +143,6 @@ fun HomeAppBar(
                         contentDescription = stringResource(R.string.cd_search)
                     )
                 }
-                IconButton(
-                    onClick = { /* TODO: Open account? */ }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = stringResource(R.string.cd_account)
-                    )
-                }
             }
         },
         modifier = modifier
