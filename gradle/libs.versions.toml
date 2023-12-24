@@ -45,6 +45,8 @@ material = "1.10.0"
 # @keep
 minSdk = "21"
 okhttp = "4.11.0"
+leak-canary = "2.12"
+timber = "5.0.1"
 robolectric = "4.9.2"
 rome = "1.18.0"
 room = "2.6.0"
@@ -127,6 +129,8 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 okhttp-logging = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp" }
 okhttp3 = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+leak-canary = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leak-canary" }
+timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
 rometools-modules = { module = "com.rometools:rome-modules", version.ref = "rome" }
 rometools-rome = { module = "com.rometools:rome", version.ref = "rome" }
