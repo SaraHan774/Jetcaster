@@ -17,6 +17,7 @@ androidx-lifecycle-compose = "2.6.2"
 androidx-lifecycle-runtime-compose = "2.6.2"
 androidx-navigation = "2.7.5"
 androidx-palette = "1.0.0"
+androidx-media3 = "1.2.0"
 androidx-test = "1.5.0"
 androidx-test-espresso = "3.5.1"
 androidx-test-ext-junit = "1.1.5"
@@ -102,6 +103,9 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-navigation-fragment = { module = "androidx.navigation:navigation-fragment-ktx", version.ref = "androidx-navigation" }
 androidx-navigation-ui-ktx = { module = "androidx.navigation:navigation-ui-ktx", version.ref = "androidx-navigation" }
 androidx-palette = { module = "androidx.palette:palette", version.ref = "androidx-palette" }
+androidx-media3-exoplayer = {module = "androidx.media3:media3-exoplayer", version.ref = "androidx-media3"}
+androidx-media3-session = {module = "androidx.media3:media3-session", version.ref = "androidx-media3"}
+androidx-media3-datasource = {module = "androidx.media3:media3-datasource-okhttp", version.ref = "androidx-media3"}
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
