@@ -10,11 +10,13 @@ import com.august.jetcaster.di.MediaModule
 class JetcasterMediaService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
+    private lateinit var notificationManager: NotificationManager
 
     @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
         mediaSession = MediaModule.provideMediaSession(this)
+        notificationManager = NotificationManager(this, mediaSession?.player!!)
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
