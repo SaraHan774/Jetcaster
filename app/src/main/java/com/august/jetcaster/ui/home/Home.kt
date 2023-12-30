@@ -104,7 +104,6 @@ fun Home(
             homeCategories = viewState.homeCategories,
             selectedHomeCategory = viewState.selectedHomeCategory,
             onCategorySelected = viewModel::onHomeCategorySelected,
-            onPodcastUnfollowed = viewModel::onPodcastUnfollowed,
             navigateToPlayer = navigateToPlayer,
             modifier = Modifier.fillMaxSize()
         )
@@ -143,14 +142,6 @@ fun HomeAppBar(
                         contentDescription = stringResource(R.string.cd_search)
                     )
                 }
-                IconButton(
-                    onClick = { /* TODO: Open account? */ }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = stringResource(R.string.cd_account)
-                    )
-                }
             }
         },
         modifier = modifier
@@ -165,7 +156,6 @@ fun HomeContent(
     selectedHomeCategory: HomeCategory,
     homeCategories: List<HomeCategory>,
     modifier: Modifier = Modifier,
-    onPodcastUnfollowed: (String) -> Unit,
     onCategorySelected: (HomeCategory) -> Unit,
     navigateToPlayer: (String) -> Unit
 ) {
@@ -220,22 +210,6 @@ fun HomeContent(
                     backgroundColor = appBarColor,
                     modifier = Modifier.fillMaxWidth()
                 )
-
-                if (featuredPodcasts.isNotEmpty()) {
-                    Spacer(Modifier.height(16.dp))
-
-                    FollowedPodcasts(
-                        items = featuredPodcasts,
-                        pagerState = pagerState,
-                        onPodcastUnfollowed = onPodcastUnfollowed,
-                        modifier = Modifier
-                            .padding(start = Keyline1, top = 16.dp, end = Keyline1)
-                            .fillMaxWidth()
-                            .height(200.dp)
-                    )
-
-                    Spacer(Modifier.height(16.dp))
-                }
             }
         }
 
@@ -318,99 +292,6 @@ fun HomeCategoryTabIndicator(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun FollowedPodcasts(
-    items: PersistentList<PodcastWithExtraInfo>,
-    pagerState: PagerState,
-    modifier: Modifier = Modifier,
-    onPodcastUnfollowed: (String) -> Unit,
-) {
-    HorizontalPager(
-        state = pagerState,
-        modifier = modifier
-    ) { page ->
-        val (podcast, lastEpisodeDate) = items[page]
-        FollowedPodcastCarouselItem(
-            podcastImageUrl = podcast.imageUrl,
-            podcastTitle = podcast.title,
-            onUnfollowedClick = { onPodcastUnfollowed(podcast.uri) },
-            lastEpisodeDateText = lastEpisodeDate?.let { lastUpdated(it) },
-            modifier = Modifier
-                .padding(4.dp)
-                .fillMaxHeight()
-        )
-    }
-}
-
-@Composable
-private fun FollowedPodcastCarouselItem(
-    modifier: Modifier = Modifier,
-    podcastImageUrl: String? = null,
-    podcastTitle: String? = null,
-    lastEpisodeDateText: String? = null,
-    onUnfollowedClick: () -> Unit,
-) {
-    Column(
-        modifier.padding(horizontal = 12.dp, vertical = 8.dp)
-    ) {
-        Box(
-            Modifier
-                .weight(1f)
-                .align(Alignment.CenterHorizontally)
-                .aspectRatio(1f)
-        ) {
-            if (podcastImageUrl != null) {
-                AsyncImage(
-                    model = podcastImageUrl,
-                    contentDescription = podcastTitle,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(MaterialTheme.shapes.medium),
-                )
-            }
-
-            ToggleFollowPodcastIconButton(
-                onClick = onUnfollowedClick,
-                isFollowed = true, /* All podcasts are followed in this feed */
-                modifier = Modifier.align(Alignment.BottomEnd)
-            )
-        }
-
-        if (lastEpisodeDateText != null) {
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                Text(
-                    text = lastEpisodeDateText,
-                    style = MaterialTheme.typography.caption,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier
-                        .padding(top = 8.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun lastUpdated(updated: OffsetDateTime): String {
-    val duration = Duration.between(updated.toLocalDateTime(), LocalDateTime.now())
-    val days = duration.toDays().toInt()
-
-    return when {
-        days > 28 -> stringResource(R.string.updated_longer)
-        days >= 7 -> {
-            val weeks = days / 7
-            quantityStringResource(R.plurals.updated_weeks_ago, weeks, weeks)
-        }
-
-        days > 0 -> quantityStringResource(R.plurals.updated_days_ago, days, days)
-        else -> stringResource(R.string.updated_today)
-    }
-}
-
 /*
 TODO: Fix preview error
 @Composable
@@ -428,14 +309,3 @@ fun PreviewHomeContent() {
     }
 }
 */
-
-@Composable
-@Preview
-fun PreviewPodcastCard() {
-    JetcasterTheme {
-        FollowedPodcastCarouselItem(
-            modifier = Modifier.size(128.dp),
-            onUnfollowedClick = {}
-        )
-    }
-}
