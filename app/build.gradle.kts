@@ -128,4 +128,8 @@ dependencies {
 
     ksp(libs.androidx.room.compiler)
     coreLibraryDesugaring(libs.core.jdk.desugaring)
+
+    implementation(libs.timber)
+
+    debugImplementation(libs.leak.canary)
 }

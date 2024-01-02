@@ -41,7 +41,6 @@
     <string name="episode_date_duration">%1$s &#8226; %2$d mins</string>
 
     <string name="cd_search">Search</string>
-    <string name="cd_account">Account</string>
     <string name="cd_add">Add</string>
     <string name="cd_back">Back</string>
     <string name="cd_more">More</string>
