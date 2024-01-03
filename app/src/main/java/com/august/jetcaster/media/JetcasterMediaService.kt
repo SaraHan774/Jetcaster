@@ -9,32 +9,41 @@ import com.august.jetcaster.di.MediaModule
 
 class JetcasterMediaService : MediaSessionService() {
 
-    private var mediaSession: MediaSession? = null
+    private lateinit var mediaSession: MediaSession
     private lateinit var notificationManager: NotificationManager
 
     @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
         mediaSession = MediaModule.provideMediaSession(this)
-        notificationManager = NotificationManager(this, mediaSession?.player!!)
+        notificationManager = NotificationManager(this, mediaSession.player)
+    }
+
+    @UnstableApi
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        notificationManager.startNotificationService(
+            mediaSessionService = this,
+            mediaSession = mediaSession
+        )
+
+        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        val player = mediaSession?.player
-        if (player?.playWhenReady == true) {
+        val player = mediaSession.player
+        if (player.playWhenReady) {
             player.pause()
         }
         stopSelf()
     }
 
-    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
-
     override fun onDestroy() {
-        mediaSession?.run {
+        mediaSession.run {
             player.release()
             release()
-            mediaSession = null
         }
         super.onDestroy()
     }
+
+    override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
 }

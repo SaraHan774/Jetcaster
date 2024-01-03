@@ -63,9 +63,6 @@ class NotificationManager(
     private fun startForegroundNotification(mediaSessionService: MediaSessionService) {
         val notification = buildServiceNotification()
         mediaSessionService.startForeground(NOTIFICATION_ID, notification)
-
-        // NOTE: What's the difference with this one.
-//        ServiceCompat.startForeground()
     }
 
     private fun buildServiceNotification(): Notification {
