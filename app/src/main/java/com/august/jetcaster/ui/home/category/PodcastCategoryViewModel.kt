@@ -23,15 +23,18 @@ import com.august.jetcaster.data.CategoryStore
 import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PodcastCategoryViewModel(
-    private val categoryId: Long,
-    private val categoryStore: CategoryStore = Graph.categoryStore,
-    private val podcastStore: PodcastStore = Graph.podcastStore
+@HiltViewModel
+class PodcastCategoryViewModel @Inject constructor(
+    private val categoryId: Long, // TODO
+    private val categoryStore: CategoryStore = Graph.categoryStore, // TODO
+    private val podcastStore: PodcastStore = Graph.podcastStore // TODO
 ) : ViewModel() {
     private val _state = MutableStateFlow(PodcastCategoryViewState())
 

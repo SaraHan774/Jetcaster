@@ -18,7 +18,6 @@ package com.august.jetcaster.ui.home.discover
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.august.jetcaster.Graph
 import com.august.jetcaster.data.Category
 import com.august.jetcaster.data.CategoryStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,9 +25,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class DiscoverViewModel(
-    private val categoryStore: CategoryStore = Graph.categoryStore
+class DiscoverViewModel @Inject constructor(
+    private val categoryStore: CategoryStore
 ) : ViewModel() {
     // Holds our currently selected category
     private val _selectedCategory = MutableStateFlow<Category?>(null)

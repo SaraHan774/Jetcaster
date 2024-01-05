@@ -1,10 +1,14 @@
 package com.august.jetcaster.di.modules
 
 import android.content.Context
+import com.august.jetcaster.data.PodcastsFetcher
+import com.rometools.rome.io.SyndFeedInput
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
@@ -22,4 +26,18 @@ object NetworkModule {
             }
             .build()
     }
+
+    @Provides
+    fun provideSyndFeedInput() = SyndFeedInput()
+
+    @Provides
+    fun providePodcastFetcher(
+        okHttpClient: OkHttpClient,
+        syndFeedInput: SyndFeedInput,
+        ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    ) = PodcastsFetcher(
+        okHttpClient,
+        syndFeedInput,
+        ioDispatcher
+    )
 }

@@ -32,6 +32,7 @@ import com.august.jetcaster.data.PodcastStore
 import java.time.Duration
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class PlayerUiState(
     val title: String = "",
@@ -46,7 +47,7 @@ data class PlayerUiState(
 /**
  * ViewModel that handles the business logic and screen state of the Player screen
  */
-class PlayerViewModel(
+class PlayerViewModel @Inject constructor(
     episodeStore: EpisodeStore,
     podcastStore: PodcastStore,
     savedStateHandle: SavedStateHandle
@@ -78,8 +79,8 @@ class PlayerViewModel(
      */
     companion object {
         fun provideFactory(
-            episodeStore: EpisodeStore = Graph.episodeStore,
-            podcastStore: PodcastStore = Graph.podcastStore,
+            episodeStore: EpisodeStore = Graph.episodeStore, // TODO
+            podcastStore: PodcastStore = Graph.podcastStore, // TODO
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null,
         ): AbstractSavedStateViewModelFactory =

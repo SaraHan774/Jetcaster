@@ -20,11 +20,12 @@ import com.august.jetcaster.data.room.PodcastFollowedEntryDao
 import com.august.jetcaster.data.room.PodcastsDao
 import com.august.jetcaster.data.room.TransactionRunner
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 /**
  * A data repository for [Podcast] instances.
  */
-class PodcastStore(
+class PodcastStore @Inject constructor(
     private val podcastDao: PodcastsDao,
     private val podcastFollowedEntryDao: PodcastFollowedEntryDao,
     private val transactionRunner: TransactionRunner
