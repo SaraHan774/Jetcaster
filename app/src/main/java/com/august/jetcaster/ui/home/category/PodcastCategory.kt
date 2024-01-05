@@ -71,6 +71,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.august.jetcaster.Graph
 import com.august.jetcaster.R
 import com.august.jetcaster.data.Episode
 import com.august.jetcaster.data.EpisodeToPodcast
@@ -95,10 +96,11 @@ fun PodcastCategory(
      * CategoryEpisodeListViewModel requires the category as part of it's constructor, therefore
      * we need to assist with it's instantiation with a custom factory and custom key.
      */
+    // FIXME: https://github.com/google/dagger/issues/2328
     val viewModel: PodcastCategoryViewModel = viewModel(
-        // We use a custom key, using the category parameter
-        key = "category_list_$categoryId",
-        factory = viewModelProviderFactoryOf { PodcastCategoryViewModel(categoryId) }
+        factory = PodcastCategoryViewModel.provideFactory(
+            owner = LocalContext.current,
+        )
     )
 
     val viewState by viewModel.state.collectAsStateWithLifecycle()

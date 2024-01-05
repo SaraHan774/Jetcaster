@@ -17,6 +17,7 @@
 package com.august.jetcaster.data
 
 import coil.network.HttpException
+import com.august.jetcaster.di.modules.IODispatcher
 import com.rometools.modules.itunes.EntryInformation
 import com.rometools.modules.itunes.FeedInformation
 import com.rometools.rome.feed.synd.SyndEntry
@@ -36,6 +37,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import javax.inject.Inject
 
 /**
  * A class which fetches some selected podcast RSS feeds.
@@ -44,10 +46,10 @@ import okhttp3.Request
  * @param syndFeedInput [SyndFeedInput] to use for parsing RSS feeds.
  * @param ioDispatcher [CoroutineDispatcher] to use for running fetch requests.
  */
-class PodcastsFetcher(
+class PodcastsFetcher @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val syndFeedInput: SyndFeedInput,
-    private val ioDispatcher: CoroutineDispatcher
+    @IODispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
 
     /**

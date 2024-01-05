@@ -16,8 +16,17 @@
 
 package com.august.jetcaster.ui.home.category
 
+import android.content.Context
+import android.os.Bundle
+import androidx.lifecycle.AbstractSavedStateViewModelFactory
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.savedstate.SavedStateRegistryOwner
 import com.august.jetcaster.Graph
 import com.august.jetcaster.data.CategoryStore
 import com.august.jetcaster.data.EpisodeToPodcast
@@ -32,9 +41,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PodcastCategoryViewModel @Inject constructor(
-    private val categoryId: Long, // TODO
-    private val categoryStore: CategoryStore = Graph.categoryStore, // TODO
-    private val podcastStore: PodcastStore = Graph.podcastStore // TODO
+    // FIXME: private val categoryId: Long,
+    private val categoryStore: CategoryStore,
+    private val podcastStore: PodcastStore,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(PodcastCategoryViewState())
 
@@ -42,6 +52,8 @@ class PodcastCategoryViewModel @Inject constructor(
         get() = _state
 
     init {
+        val categoryId = savedStateHandle["category_id_key"] ?: 0L
+
         viewModelScope.launch {
             val recentPodcastsFlow = categoryStore.podcastsInCategorySortedByPodcastCount(
                 categoryId,
@@ -66,6 +78,12 @@ class PodcastCategoryViewModel @Inject constructor(
     fun onTogglePodcastFollowed(podcastUri: String) {
         viewModelScope.launch {
             podcastStore.togglePodcastFollowed(podcastUri)
+        }
+    }
+
+    companion object {
+        fun provideFactory(owner: Context): ViewModelProvider.Factory? {
+            TODO("Not yet implemented")
         }
     }
 }

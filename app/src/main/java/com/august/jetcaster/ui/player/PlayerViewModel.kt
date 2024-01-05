@@ -29,6 +29,7 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.august.jetcaster.Graph
 import com.august.jetcaster.data.EpisodeStore
 import com.august.jetcaster.data.PodcastStore
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Duration
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -47,6 +48,7 @@ data class PlayerUiState(
 /**
  * ViewModel that handles the business logic and screen state of the Player screen
  */
+@HiltViewModel
 class PlayerViewModel @Inject constructor(
     episodeStore: EpisodeStore,
     podcastStore: PodcastStore,
@@ -79,8 +81,8 @@ class PlayerViewModel @Inject constructor(
      */
     companion object {
         fun provideFactory(
-            episodeStore: EpisodeStore = Graph.episodeStore, // TODO
-            podcastStore: PodcastStore = Graph.podcastStore, // TODO
+            episodeStore: EpisodeStore = Graph.episodeStore, // FIXME
+            podcastStore: PodcastStore = Graph.podcastStore, // FIXME
             owner: SavedStateRegistryOwner,
             defaultArgs: Bundle? = null,
         ): AbstractSavedStateViewModelFactory =
