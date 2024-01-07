@@ -16,27 +16,31 @@
 
 package com.august.jetcaster.ui.home.category
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.august.jetcaster.Graph
 import com.august.jetcaster.data.CategoryStore
 import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 
-class PodcastCategoryViewModel(
-    private val categoryId: Long,
-    private val categoryStore: CategoryStore = Graph.categoryStore,
-    private val podcastStore: PodcastStore = Graph.podcastStore
+class PodcastCategoryViewModel @AssistedInject constructor(
+    @Assisted val categoryId: Long,
+    categoryStore: CategoryStore,
+    val podcastStore: PodcastStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(PodcastCategoryViewState())
 
     val state: StateFlow<PodcastCategoryViewState>
         get() = _state
+
 
     init {
         viewModelScope.launch {
@@ -49,7 +53,6 @@ class PodcastCategoryViewModel(
                 categoryId,
                 limit = 20
             )
-
             // Combine our flows and collect them into the view state StateFlow
             combine(recentPodcastsFlow, episodesFlow) { topPodcasts, episodes ->
                 PodcastCategoryViewState(
@@ -63,6 +66,20 @@ class PodcastCategoryViewModel(
     fun onTogglePodcastFollowed(podcastUri: String) {
         viewModelScope.launch {
             podcastStore.togglePodcastFollowed(podcastUri)
+        }
+    }
+
+    companion object {
+        @Suppress("UNCHECKED_CAST")
+        fun provideFactory(
+            assistedFactory: PodcastCategoryViewModelFactory,
+            categoryId: Long
+        ) : ViewModelProvider.Factory {
+            return object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return assistedFactory.create(categoryId) as T
+                }
+            }
         }
     }
 }

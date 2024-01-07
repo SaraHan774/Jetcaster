@@ -83,6 +83,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.window.layout.DisplayFeature
 import androidx.window.layout.FoldingFeature
 import coil.compose.AsyncImage
@@ -107,10 +108,10 @@ import java.time.Duration
  */
 @Composable
 fun PlayerScreen(
-    viewModel: PlayerViewModel,
     windowSizeClass: WindowSizeClass,
     displayFeatures: List<DisplayFeature>,
-    onBackPress: () -> Unit
+    onBackPress: () -> Unit,
+    viewModel: PlayerViewModel = hiltViewModel(),
 ) {
     val uiState = viewModel.uiState
     PlayerScreen(uiState, windowSizeClass, displayFeatures, onBackPress)

@@ -18,10 +18,10 @@ package com.august.jetcaster.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.august.jetcaster.Graph
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.data.PodcastsRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
@@ -30,10 +30,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class HomeViewModel(
-    private val podcastsRepository: PodcastsRepository = Graph.podcastRepository,
-    private val podcastStore: PodcastStore = Graph.podcastStore
+@HiltViewModel
+class HomeViewModel @Inject constructor(
+    private val podcastsRepository: PodcastsRepository,
+    private val podcastStore: PodcastStore,
 ) : ViewModel() {
     // Holds our currently selected home category
     private val selectedCategory = MutableStateFlow(HomeCategory.Discover)
