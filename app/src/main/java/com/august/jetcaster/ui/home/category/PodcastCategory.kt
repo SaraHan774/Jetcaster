@@ -90,7 +90,7 @@ import java.time.format.FormatStyle
 
 @Composable
 fun PodcastCategory(
-    categoryId: Long,
+    categoryId: Long, // FIXME: categoryId should be passed using savedStateHandle. 근데 현재 구조상 어려워 보인다.
     navigateToPlayer: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -99,12 +99,7 @@ fun PodcastCategory(
      * we need to assist with it's instantiation with a custom factory and custom key.
      */
     // FIXME: https://github.com/google/dagger/issues/2328
-    val viewModel: PodcastCategoryViewModel = viewModel(
-        factory = PodcastCategoryViewModel.provideFactory(
-            owner = LocalSavedStateRegistryOwner.current,
-            defaultArgs = bundleOf( "categoryId" to categoryId)
-        )
-    )
+    val viewModel: PodcastCategoryViewModel = hiltViewModel()
 
     val viewState by viewModel.state.collectAsStateWithLifecycle()
 

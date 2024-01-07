@@ -16,12 +16,9 @@
 
 package com.august.jetcaster.ui.home.category
 
-import android.os.Bundle
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
 import com.august.jetcaster.data.CategoryStore
 import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.PodcastStore
@@ -35,6 +32,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PodcastCategoryViewModel @Inject constructor(
+    categoryStore: CategoryStore,
+    val podcastStore: PodcastStore,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(PodcastCategoryViewState())
@@ -42,12 +41,9 @@ class PodcastCategoryViewModel @Inject constructor(
     val state: StateFlow<PodcastCategoryViewState>
         get() = _state
 
-    @Inject lateinit var categoryStore: CategoryStore
-    @Inject lateinit var podcastStore: PodcastStore
-
 
     init {
-        val categoryId = savedStateHandle["categoryId"] ?: 0L
+        val categoryId = savedStateHandle["categoryId"] ?: 1L // FIXME: Hardcoded for now.
 
         viewModelScope.launch {
             val recentPodcastsFlow = categoryStore.podcastsInCategorySortedByPodcastCount(
@@ -73,24 +69,6 @@ class PodcastCategoryViewModel @Inject constructor(
     fun onTogglePodcastFollowed(podcastUri: String) {
         viewModelScope.launch {
             podcastStore.togglePodcastFollowed(podcastUri)
-        }
-    }
-
-    companion object {
-        fun provideFactory(
-            owner: SavedStateRegistryOwner,
-            defaultArgs: Bundle? = null,
-        ): AbstractSavedStateViewModelFactory {
-            return object : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(
-                    key: String,
-                    modelClass: Class<T>,
-                    handle: SavedStateHandle
-                ): T {
-                    return PodcastCategoryViewModel(handle) as T
-                }
-            }
         }
     }
 }

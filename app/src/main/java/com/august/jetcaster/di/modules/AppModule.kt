@@ -23,11 +23,13 @@ import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import java.io.File
+import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
+    @Singleton
     @Provides
     fun provideDatabase(@ApplicationContext context: Context): JetcasterDatabase {
         return Room.databaseBuilder(context, JetcasterDatabase::class.java, "data.db")
@@ -37,22 +39,28 @@ object AppModule {
             .build()
     }
 
+    @Singleton
     @Provides
     fun providePodcastsDao(db: JetcasterDatabase): PodcastsDao = db.podcastsDao()
 
+    @Singleton
     @Provides
     fun providePodcastFollowedEntryDao(db: JetcasterDatabase): PodcastFollowedEntryDao =
         db.podcastFollowedEntryDao()
 
+    @Singleton
     @Provides
     fun provideEpisodesDao(db: JetcasterDatabase): EpisodesDao = db.episodesDao()
 
+    @Singleton
     @Provides
     fun provideCategoryDao(db: JetcasterDatabase): CategoriesDao = db.categoriesDao()
 
+    @Singleton
     @Provides
     fun provideCategoryEntryDao(db: JetcasterDatabase): PodcastCategoryEntryDao = db.podcastCategoryEntryDao()
 
+    @Singleton
     @Provides
     fun provideCategoryStore(
         categoriesDao: CategoriesDao,
@@ -66,14 +74,17 @@ object AppModule {
         podcastsDao = podcastsDao
     )
 
+    @Singleton
     @Provides
     fun provideEpisodeStore(
         episodesDao: EpisodesDao,
     ) = EpisodeStore(episodesDao = episodesDao)
 
+    @Singleton
     @Provides
     fun provideTransactionRunner(db: JetcasterDatabase): TransactionRunner = db.transactionRunnerDao()
 
+    @Singleton
     @Provides
     fun providePodcastStore(
         podcastDao: PodcastsDao,
@@ -85,6 +96,7 @@ object AppModule {
         transactionRunner = transactionRunner
     )
 
+    @Singleton
     @Provides
     fun provideOkHttpClient(@ApplicationContext context: Context): OkHttpClient {
         return OkHttpClient.Builder()
@@ -95,9 +107,11 @@ object AppModule {
             .build()
     }
 
+    @Singleton
     @Provides
     fun provideSyndFeedInput() = SyndFeedInput()
 
+    @Singleton
     @Provides
     fun providePodcastFetcher(
         okHttpClient: OkHttpClient,
