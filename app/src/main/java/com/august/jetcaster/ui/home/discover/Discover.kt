@@ -33,8 +33,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.august.jetcaster.data.Category
 import com.august.jetcaster.ui.home.category.PodcastCategory
 import com.august.jetcaster.ui.theme.Keyline1
@@ -44,7 +44,7 @@ fun Discover(
     navigateToPlayer: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val viewModel: DiscoverViewModel = viewModel()
+    val viewModel: DiscoverViewModel = hiltViewModel()
     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
     val selectedCategory = viewState.selectedCategory

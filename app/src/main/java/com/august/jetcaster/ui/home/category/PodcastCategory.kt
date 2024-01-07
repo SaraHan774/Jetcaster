@@ -57,6 +57,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -67,11 +68,13 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension.Companion.fillToConstraints
 import androidx.constraintlayout.compose.Dimension.Companion.preferredWrapContent
+import androidx.core.os.bundleOf
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import com.august.jetcaster.Graph
 import com.august.jetcaster.R
 import com.august.jetcaster.data.Episode
 import com.august.jetcaster.data.EpisodeToPodcast
@@ -82,7 +85,6 @@ import com.august.jetcaster.ui.home.PreviewPodcasts
 import com.august.jetcaster.ui.theme.JetcasterTheme
 import com.august.jetcaster.ui.theme.Keyline1
 import com.august.jetcaster.util.ToggleFollowPodcastIconButton
-import com.august.jetcaster.util.viewModelProviderFactoryOf
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -99,7 +101,8 @@ fun PodcastCategory(
     // FIXME: https://github.com/google/dagger/issues/2328
     val viewModel: PodcastCategoryViewModel = viewModel(
         factory = PodcastCategoryViewModel.provideFactory(
-            owner = LocalContext.current,
+            owner = LocalSavedStateRegistryOwner.current,
+            defaultArgs = bundleOf( "categoryId" to categoryId)
         )
     )
 
@@ -320,7 +323,7 @@ private fun CategoryPodcastRow(
         contentPadding = PaddingValues(start = Keyline1, top = 8.dp, end = Keyline1, bottom = 24.dp)
     ) {
         itemsIndexed(items = podcasts) { index: Int,
-            (podcast, _, isFollowed): PodcastWithExtraInfo ->
+                                         (podcast, _, isFollowed): PodcastWithExtraInfo ->
             TopPodcastRowItem(
                 podcastTitle = podcast.title,
                 podcastImageUrl = podcast.imageUrl,

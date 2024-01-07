@@ -57,12 +57,12 @@ class PlayerViewModel @Inject constructor(
 
     // episodeUri should always be present in the PlayerViewModel.
     // If that's not the case, fail crashing the app!
-    private val episodeUri: String = Uri.decode(savedStateHandle.get<String>("episodeUri")!!)
 
     var uiState by mutableStateOf(PlayerUiState())
         private set
 
     init {
+        val episodeUri: String = Uri.decode(savedStateHandle.get<String>("episodeUri")!!)
         viewModelScope.launch {
             val episode = episodeStore.episodeWithUri(episodeUri).first()
             val podcast = podcastStore.podcastWithUri(episode.podcastUri).first()
@@ -74,27 +74,5 @@ class PlayerViewModel @Inject constructor(
                 podcastImageUrl = podcast.imageUrl ?: ""
             )
         }
-    }
-
-    /**
-     * Factory for PlayerViewModel that takes EpisodeStore and PodcastStore as a dependency
-     */
-    companion object {
-        fun provideFactory(
-            episodeStore: EpisodeStore = Graph.episodeStore, // FIXME
-            podcastStore: PodcastStore = Graph.podcastStore, // FIXME
-            owner: SavedStateRegistryOwner,
-            defaultArgs: Bundle? = null,
-        ): AbstractSavedStateViewModelFactory =
-            object : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(
-                    key: String,
-                    modelClass: Class<T>,
-                    handle: SavedStateHandle
-                ): T {
-                    return PlayerViewModel(episodeStore, podcastStore, handle) as T
-                }
-            }
     }
 }
