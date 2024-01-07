@@ -16,6 +16,8 @@
 
 package com.august.jetcaster.ui.home.category
 
+import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -49,6 +51,7 @@ import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -69,6 +72,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension.Companion.fillToConstraints
 import androidx.constraintlayout.compose.Dimension.Companion.preferredWrapContent
 import androidx.core.os.bundleOf
+import androidx.hilt.navigation.HiltViewModelFactory
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -80,13 +84,16 @@ import com.august.jetcaster.data.Episode
 import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.Podcast
 import com.august.jetcaster.data.PodcastWithExtraInfo
+import com.august.jetcaster.di.modules.ViewModelFactoryProvider
 import com.august.jetcaster.ui.home.PreviewEpisodes
 import com.august.jetcaster.ui.home.PreviewPodcasts
 import com.august.jetcaster.ui.theme.JetcasterTheme
 import com.august.jetcaster.ui.theme.Keyline1
 import com.august.jetcaster.util.ToggleFollowPodcastIconButton
+import dagger.hilt.android.EntryPointAccessors
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import javax.inject.Inject
 
 @Composable
 fun PodcastCategory(
@@ -94,13 +101,20 @@ fun PodcastCategory(
     navigateToPlayer: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val factory = EntryPointAccessors.fromActivity(
+        LocalContext.current as Activity,
+        ViewModelFactoryProvider::class.java
+    ).podcastsCategoryViewModelFactory()
+
     /**
      * CategoryEpisodeListViewModel requires the category as part of it's constructor, therefore
      * we need to assist with it's instantiation with a custom factory and custom key.
      */
     // FIXME: https://github.com/google/dagger/issues/2328
-    val viewModel: PodcastCategoryViewModel = hiltViewModel()
-
+    val viewModel: PodcastCategoryViewModel = viewModel(
+        key = "PodcastViewModel_$categoryId",
+        factory = PodcastCategoryViewModel.provideFactory(factory, categoryId)
+    )
     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
     /**

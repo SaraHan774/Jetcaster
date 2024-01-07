@@ -22,9 +22,6 @@ import coil.ImageLoaderFactory
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
-/**
- * Application which sets up our dependency [Graph] with a context.
- */
 @HiltAndroidApp
 class JetcasterApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {

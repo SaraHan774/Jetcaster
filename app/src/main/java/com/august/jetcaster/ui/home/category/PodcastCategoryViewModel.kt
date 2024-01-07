@@ -16,25 +16,25 @@
 
 package com.august.jetcaster.ui.home.category
 
-import androidx.lifecycle.SavedStateHandle
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.august.jetcaster.data.CategoryStore
 import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
-import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class PodcastCategoryViewModel @Inject constructor(
+class PodcastCategoryViewModel @AssistedInject constructor(
+    @Assisted val categoryId: Long,
     categoryStore: CategoryStore,
     val podcastStore: PodcastStore,
-    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val _state = MutableStateFlow(PodcastCategoryViewState())
 
@@ -43,8 +43,6 @@ class PodcastCategoryViewModel @Inject constructor(
 
 
     init {
-        val categoryId = savedStateHandle["categoryId"] ?: 1L // FIXME: Hardcoded for now.
-
         viewModelScope.launch {
             val recentPodcastsFlow = categoryStore.podcastsInCategorySortedByPodcastCount(
                 categoryId,
@@ -55,7 +53,6 @@ class PodcastCategoryViewModel @Inject constructor(
                 categoryId,
                 limit = 20
             )
-
             // Combine our flows and collect them into the view state StateFlow
             combine(recentPodcastsFlow, episodesFlow) { topPodcasts, episodes ->
                 PodcastCategoryViewState(
@@ -69,6 +66,20 @@ class PodcastCategoryViewModel @Inject constructor(
     fun onTogglePodcastFollowed(podcastUri: String) {
         viewModelScope.launch {
             podcastStore.togglePodcastFollowed(podcastUri)
+        }
+    }
+
+    companion object {
+        @Suppress("UNCHECKED_CAST")
+        fun provideFactory(
+            assistedFactory: PodcastCategoryViewModelFactory,
+            categoryId: Long
+        ) : ViewModelProvider.Factory {
+            return object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return assistedFactory.create(categoryId) as T
+                }
+            }
         }
     }
 }

@@ -30,7 +30,6 @@ import javax.inject.Singleton
 /**
  * Data repository for Podcasts.
  */
-@Singleton
 class PodcastsRepository @Inject constructor(
     private val podcastsFetcher: PodcastsFetcher,
     private val podcastStore: PodcastStore,
