@@ -62,6 +62,9 @@ class PlayerViewModel(
         private set
 
     init {
+        // NOTE: Temporary
+        onMediaEvent(MediaEvent.SetItem(uri = episodeUri))
+
         viewModelScope.launch {
             val episode = episodeStore.episodeWithUri(episodeUri).first()
             val podcast = podcastStore.podcastWithUri(episode.podcastUri).first()

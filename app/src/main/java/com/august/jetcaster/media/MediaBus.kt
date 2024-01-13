@@ -20,7 +20,7 @@ object MediaBus {
 sealed interface MediaEvent {
     data object Unit : MediaEvent
 
-    data class SetItem(val id: Int) : MediaEvent
+    data class SetItem(val uri: String) : MediaEvent
 
     data object PlayPause : MediaEvent
 
