@@ -22,10 +22,6 @@ import com.rometools.modules.itunes.FeedInformation
 import com.rometools.rome.feed.synd.SyndEntry
 import com.rometools.rome.feed.synd.SyndFeed
 import com.rometools.rome.io.SyndFeedInput
-import java.time.Duration
-import java.time.Instant
-import java.time.ZoneOffset
-import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
@@ -36,6 +32,10 @@ import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import java.time.Duration
+import java.time.Instant
+import java.time.ZoneOffset
+import java.util.concurrent.TimeUnit
 
 /**
  * A class which fetches some selected podcast RSS feeds.
@@ -142,11 +142,13 @@ private fun SyndFeed.toPodcastResponse(feedUrl: String): PodcastRssResponse {
  */
 private fun SyndEntry.toEpisode(podcastUri: String): Episode {
     val entryInformation = getModule(PodcastModuleDtd) as? EntryInformation
+    val url = enclosures.firstOrNull()?.url
     return Episode(
         uri = uri,
         podcastUri = podcastUri,
         title = title,
         author = author,
+        url = url,
         summary = entryInformation?.summary ?: description?.value,
         subtitle = entryInformation?.subtitle,
         published = Instant.ofEpochMilli(publishedDate.time).atOffset(ZoneOffset.UTC),
