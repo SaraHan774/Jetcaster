@@ -33,13 +33,12 @@ import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.media.PlayerState
 import kotlinx.coroutines.launch
-import java.time.Duration
 
 data class PlayerUiState(
     val title: String = "",
     val subTitle: String = "",
     val position: Long = 0L,
-    val duration: Duration? = null,
+    val duration: Long = 0L,
     val podcastName: String = "",
     val author: String = "",
     val summary: String = "",
@@ -76,7 +75,7 @@ class PlayerViewModel(
                     podcastName = it.mediaItem.albumTitle.toString(),
                     podcastImageUrl = it.mediaItem.artworkUri?.toString() ?: "",
                     summary = it.mediaItem.description.toString(),
-                    duration = Duration.ofMillis(it.duration),
+                    duration = it.duration,
                     position = it.position,
                     isPlaying = it.isPlaying,
                     isBuffering = it.playerState == PlayerState.BUFFERING

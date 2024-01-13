@@ -96,6 +96,7 @@ import com.august.jetcaster.ui.theme.JetcasterTheme
 import com.august.jetcaster.ui.theme.MinContrastOfPrimaryVsSurface
 import com.august.jetcaster.util.DynamicThemePrimaryColorsFromImage
 import com.august.jetcaster.util.contrastAgainst
+import com.august.jetcaster.util.formatDuration
 import com.august.jetcaster.util.isBookPosture
 import com.august.jetcaster.util.isSeparatingPosture
 import com.august.jetcaster.util.isTableTopPosture
@@ -104,7 +105,6 @@ import com.august.jetcaster.util.verticalGradientScrim
 import com.google.accompanist.adaptive.HorizontalTwoPaneStrategy
 import com.google.accompanist.adaptive.TwoPane
 import com.google.accompanist.adaptive.VerticalTwoPaneStrategy
-import java.time.Duration
 
 /**
  * Stateful version of the Podcast player
@@ -260,7 +260,7 @@ private fun PlayerContentRegular(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.weight(10f)
             ) {
-                PlayerSlider(uiState.duration)
+                PlayerSlider(uiState.position, uiState.duration)
                 PlayerButtons(
                     Modifier.padding(vertical = 8.dp),
                     isBuffering = uiState.isBuffering,
@@ -341,7 +341,7 @@ private fun PlayerContentTableTopBottom(
                 isPlaying = uiState.isPlaying,
                 onMediaEvent = onMediaEvent
             )
-            PlayerSlider(uiState.duration)
+            PlayerSlider(uiState.position, uiState.duration)
         }
     }
 }
@@ -397,7 +397,7 @@ private fun PlayerContentBookEnd(
                 .padding(vertical = 16.dp)
                 .weight(1f)
         )
-        PlayerSlider(uiState.duration)
+        PlayerSlider(uiState.position, uiState.duration)
         PlayerButtons(
             Modifier.padding(vertical = 8.dp),
             isBuffering = uiState.isBuffering,
@@ -510,15 +510,13 @@ private fun PodcastInformation(
 }
 
 @Composable
-private fun PlayerSlider(episodeDuration: Duration?) {
-    if (episodeDuration != null) {
-        Column(Modifier.fillMaxWidth()) {
-            Slider(value = 0f, onValueChange = { })
-            Row(Modifier.fillMaxWidth()) {
-                Text(text = "0s")
-                Spacer(modifier = Modifier.weight(1f))
-                Text("${episodeDuration.seconds}s")
-            }
+private fun PlayerSlider(position: Long, duration: Long) {
+    Column(Modifier.fillMaxWidth()) {
+        Slider(value = 0f, onValueChange = { })
+        Row(Modifier.fillMaxWidth()) {
+            Text(formatDuration(position))
+            Spacer(modifier = Modifier.weight(1f))
+            Text(formatDuration(duration))
         }
     }
 }
@@ -666,7 +664,7 @@ fun PlayerScreenPreview() {
             PlayerScreen(
                 PlayerUiState(
                     title = "Title",
-                    duration = Duration.ofHours(2),
+                    duration = 2000,
                     podcastName = "Podcast"
                 ),
                 displayFeatures = emptyList(),
