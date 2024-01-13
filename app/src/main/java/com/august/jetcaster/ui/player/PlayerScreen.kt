@@ -19,6 +19,7 @@ package com.august.jetcaster.ui.player
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -88,6 +89,7 @@ import androidx.window.layout.FoldingFeature
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.august.jetcaster.R
+import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.ui.theme.JetcasterTheme
 import com.august.jetcaster.ui.theme.MinContrastOfPrimaryVsSurface
 import com.august.jetcaster.util.DynamicThemePrimaryColorsFromImage
@@ -113,7 +115,8 @@ fun PlayerScreen(
     onBackPress: () -> Unit
 ) {
     val uiState = viewModel.uiState
-    PlayerScreen(uiState, windowSizeClass, displayFeatures, onBackPress)
+    val onMediaEvent: (MediaEvent) -> Unit = { event -> viewModel.onMediaEvent(event) }
+    PlayerScreen(uiState, windowSizeClass, displayFeatures, onBackPress, onMediaEvent)
 }
 
 /**
@@ -125,11 +128,12 @@ private fun PlayerScreen(
     windowSizeClass: WindowSizeClass,
     displayFeatures: List<DisplayFeature>,
     onBackPress: () -> Unit,
+    onMediaEvent: (MediaEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Surface(modifier) {
         if (uiState.podcastName.isNotEmpty()) {
-            PlayerContent(uiState, windowSizeClass, displayFeatures, onBackPress)
+            PlayerContent(uiState, windowSizeClass, displayFeatures, onBackPress, onMediaEvent)
         } else {
             FullScreenLoading()
         }
@@ -142,6 +146,7 @@ fun PlayerContent(
     windowSizeClass: WindowSizeClass,
     displayFeatures: List<DisplayFeature>,
     onBackPress: () -> Unit,
+    onMediaEvent: (MediaEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     PlayerDynamicTheme(uiState.podcastImageUrl) {
@@ -160,10 +165,10 @@ fun PlayerContent(
             // or we have an impactful horizontal fold. Otherwise, we'll use a horizontal strategy.
             val usingVerticalStrategy =
                 isTableTopPosture(foldingFeature) ||
-                    (
-                        isSeparatingPosture(foldingFeature) &&
-                            foldingFeature.orientation == FoldingFeature.Orientation.HORIZONTAL
-                        )
+                        (
+                                isSeparatingPosture(foldingFeature) &&
+                                        foldingFeature.orientation == FoldingFeature.Orientation.HORIZONTAL
+                                )
 
             if (usingVerticalStrategy) {
                 TwoPane(
@@ -171,7 +176,11 @@ fun PlayerContent(
                         PlayerContentTableTopTop(uiState = uiState)
                     },
                     second = {
-                        PlayerContentTableTopBottom(uiState = uiState, onBackPress = onBackPress)
+                        PlayerContentTableTopBottom(
+                            uiState = uiState,
+                            onBackPress = onBackPress,
+                            onMediaEvent = onMediaEvent
+                        )
                     },
                     strategy = VerticalTwoPaneStrategy(splitFraction = 0.5f),
                     displayFeatures = displayFeatures,
@@ -195,7 +204,10 @@ fun PlayerContent(
                             PlayerContentBookStart(uiState = uiState)
                         },
                         second = {
-                            PlayerContentBookEnd(uiState = uiState)
+                            PlayerContentBookEnd(
+                                uiState = uiState,
+                                onMediaEvent = onMediaEvent
+                            )
                         },
                         strategy = HorizontalTwoPaneStrategy(splitFraction = 0.5f),
                         displayFeatures = displayFeatures
@@ -203,7 +215,7 @@ fun PlayerContent(
                 }
             }
         } else {
-            PlayerContentRegular(uiState, onBackPress, modifier)
+            PlayerContentRegular(uiState, onBackPress, onMediaEvent, modifier)
         }
     }
 }
@@ -215,6 +227,7 @@ fun PlayerContent(
 private fun PlayerContentRegular(
     uiState: PlayerUiState,
     onBackPress: () -> Unit,
+    onMediaEvent: (MediaEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -246,7 +259,10 @@ private fun PlayerContentRegular(
                 modifier = Modifier.weight(10f)
             ) {
                 PlayerSlider(uiState.duration)
-                PlayerButtons(Modifier.padding(vertical = 8.dp))
+                PlayerButtons(
+                    Modifier.padding(vertical = 8.dp),
+                    onMediaEvent = onMediaEvent
+                )
             }
             Spacer(modifier = Modifier.weight(1f))
         }
@@ -289,6 +305,7 @@ private fun PlayerContentTableTopTop(
 private fun PlayerContentTableTopBottom(
     uiState: PlayerUiState,
     onBackPress: () -> Unit,
+    onMediaEvent: (MediaEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Content for the table part of the screen
@@ -313,7 +330,11 @@ private fun PlayerContentTableTopBottom(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.weight(10f)
         ) {
-            PlayerButtons(playerButtonSize = 92.dp, modifier = Modifier.padding(top = 8.dp))
+            PlayerButtons(
+                playerButtonSize = 92.dp,
+                modifier = Modifier.padding(top = 8.dp),
+                onMediaEvent = onMediaEvent
+            )
             PlayerSlider(uiState.duration)
         }
     }
@@ -354,6 +375,7 @@ private fun PlayerContentBookStart(
 @Composable
 private fun PlayerContentBookEnd(
     uiState: PlayerUiState,
+    onMediaEvent: (MediaEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -370,7 +392,10 @@ private fun PlayerContentBookEnd(
                 .weight(1f)
         )
         PlayerSlider(uiState.duration)
-        PlayerButtons(Modifier.padding(vertical = 8.dp))
+        PlayerButtons(
+            Modifier.padding(vertical = 8.dp),
+            onMediaEvent = onMediaEvent
+        )
     }
 }
 
@@ -494,7 +519,8 @@ private fun PlayerSlider(episodeDuration: Duration?) {
 private fun PlayerButtons(
     modifier: Modifier = Modifier,
     playerButtonSize: Dp = 72.dp,
-    sideButtonSize: Dp = 48.dp
+    sideButtonSize: Dp = 48.dp,
+    onMediaEvent: (MediaEvent) -> Unit
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -527,6 +553,7 @@ private fun PlayerButtons(
             modifier = Modifier
                 .size(playerButtonSize)
                 .semantics { role = Role.Button }
+                .clickable { onMediaEvent(MediaEvent.PlayPause) }
         )
         Image(
             imageVector = Icons.Filled.Forward30,
@@ -599,7 +626,9 @@ fun TopAppBarPreview() {
 @Composable
 fun PlayerButtonsPreview() {
     JetcasterTheme {
-        PlayerButtons()
+        PlayerButtons(
+            onMediaEvent = {}
+        )
     }
 }
 
@@ -620,7 +649,8 @@ fun PlayerScreenPreview() {
                 ),
                 displayFeatures = emptyList(),
                 windowSizeClass = WindowSizeClass.calculateFromSize(DpSize(maxWidth, maxHeight)),
-                onBackPress = { }
+                onBackPress = { },
+                onMediaEvent = { }
             )
         }
     }

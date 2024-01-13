@@ -29,9 +29,11 @@ import androidx.savedstate.SavedStateRegistryOwner
 import com.august.jetcaster.Graph
 import com.august.jetcaster.data.EpisodeStore
 import com.august.jetcaster.data.PodcastStore
-import java.time.Duration
+import com.august.jetcaster.media.MediaBus
+import com.august.jetcaster.media.MediaEvent
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.Duration
 
 data class PlayerUiState(
     val title: String = "",
@@ -71,6 +73,10 @@ class PlayerViewModel(
                 podcastImageUrl = podcast.imageUrl ?: ""
             )
         }
+    }
+
+    fun onMediaEvent(event: MediaEvent) {
+        MediaBus.sendEvent(event)
     }
 
     /**
