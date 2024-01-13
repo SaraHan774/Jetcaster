@@ -133,6 +133,7 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
                     MediaEvent.PlayPause -> playPause()
                     MediaEvent.SeekBack -> seekBack()
                     MediaEvent.SeekForward -> seekForward()
+                    is MediaEvent.SeekTo -> seekTo(it.positionAsPercentage)
                     is MediaEvent.SetItem -> setAndPlayItem(it.uri)
                     else -> {
                         toBeImplemented()
@@ -150,6 +151,11 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
     private fun seekForward() = player.seekForward()
 
     private fun seekBack() = player.seekBack()
+
+    private fun seekTo(positionAsPercentage: Float) {
+        val position = (player.duration * positionAsPercentage).toLong()
+        player.seekTo(position)
+    }
 
     private fun toBeImplemented() {
         Toast.makeText(this, "To be Implemented", Toast.LENGTH_SHORT).show()

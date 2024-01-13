@@ -260,7 +260,7 @@ private fun PlayerContentRegular(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.weight(10f)
             ) {
-                PlayerSlider(uiState.position, uiState.duration)
+                PlayerSlider(uiState.position, uiState.duration, onMediaEvent)
                 PlayerButtons(
                     Modifier.padding(vertical = 8.dp),
                     isBuffering = uiState.isBuffering,
@@ -341,7 +341,7 @@ private fun PlayerContentTableTopBottom(
                 isPlaying = uiState.isPlaying,
                 onMediaEvent = onMediaEvent
             )
-            PlayerSlider(uiState.position, uiState.duration)
+            PlayerSlider(uiState.position, uiState.duration, onMediaEvent)
         }
     }
 }
@@ -397,7 +397,7 @@ private fun PlayerContentBookEnd(
                 .padding(vertical = 16.dp)
                 .weight(1f)
         )
-        PlayerSlider(uiState.position, uiState.duration)
+        PlayerSlider(uiState.position, uiState.duration, onMediaEvent)
         PlayerButtons(
             Modifier.padding(vertical = 8.dp),
             isBuffering = uiState.isBuffering,
@@ -510,9 +510,19 @@ private fun PodcastInformation(
 }
 
 @Composable
-private fun PlayerSlider(position: Long, duration: Long) {
+private fun PlayerSlider(
+    position: Long,
+    duration: Long,
+    onMediaEvent: (MediaEvent) -> Unit
+) {
+    val sliderValue = if (position != 0L && duration != 0L) position.toFloat() / duration else 0f
     Column(Modifier.fillMaxWidth()) {
-        Slider(value = 0f, onValueChange = { })
+        Slider(
+            value = sliderValue,
+            onValueChange = {
+                onMediaEvent(MediaEvent.SeekTo(positionAsPercentage = it))
+            }
+        )
         Row(Modifier.fillMaxWidth()) {
             Text(formatDuration(position))
             Spacer(modifier = Modifier.weight(1f))
