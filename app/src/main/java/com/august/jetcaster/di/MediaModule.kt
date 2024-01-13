@@ -26,6 +26,8 @@ object MediaModule {
         .setAudioAttributes(provideAudioAttributes(), true)
         .setHandleAudioBecomingNoisy(true)
         .setTrackSelector(DefaultTrackSelector(context))
+        .setSeekBackIncrementMs(10 * 1_000)
+        .setSeekForwardIncrementMs(30 * 1_000)
         .build()
 
     private fun provideAudioAttributes(): AudioAttributes = AudioAttributes.Builder()

@@ -2,6 +2,7 @@ package com.august.jetcaster.media
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
@@ -69,11 +70,12 @@ class JetcasterMediaService : MediaSessionService() {
             MediaBus.events.collect {
                 when (it) {
                     MediaEvent.PlayPause -> playPause()
-                    MediaEvent.SeekBack -> TODO()
-                    MediaEvent.SeekForward -> TODO()
-                    is MediaEvent.SeekTo -> TODO()
+                    MediaEvent.SeekBack -> seekBack()
+                    MediaEvent.SeekForward -> seekForward()
                     is MediaEvent.SetItem -> setAndPlayItem(it.uri)
-                    MediaEvent.Unit -> {}
+                    else -> {
+                        toBeImplemented()
+                    }
                 }
             }
         }
@@ -82,6 +84,14 @@ class JetcasterMediaService : MediaSessionService() {
     private fun playPause() {
         if (player.isPlaying) player.pause()
         else player.play()
+    }
+
+    private fun seekForward() = player.seekForward()
+
+    private fun seekBack() = player.seekBack()
+
+    private fun toBeImplemented() {
+        Toast.makeText(this, "To be Implemented", Toast.LENGTH_SHORT).show()
     }
 
     private fun setAndPlayItem(uri: String) = coroutineScope.launch {

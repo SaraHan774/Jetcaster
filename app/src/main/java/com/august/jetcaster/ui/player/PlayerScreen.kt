@@ -536,14 +536,14 @@ private fun PlayerButtons(
             contentDescription = stringResource(R.string.cd_skip_previous),
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = buttonsModifier
+            modifier = buttonsModifier.clickable { onMediaEvent(MediaEvent.SkipPrev) }
         )
         Image(
             imageVector = Icons.Filled.Replay10,
             contentDescription = stringResource(R.string.cd_reply10),
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = buttonsModifier
+            modifier = buttonsModifier.clickable { onMediaEvent(MediaEvent.SeekBack) }
         )
         Image(
             imageVector = Icons.Rounded.PlayCircleFilled,
@@ -560,14 +560,14 @@ private fun PlayerButtons(
             contentDescription = stringResource(R.string.cd_forward30),
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = buttonsModifier
+            modifier = buttonsModifier.clickable { onMediaEvent(MediaEvent.SeekForward) }
         )
         Image(
             imageVector = Icons.Filled.SkipNext,
             contentDescription = stringResource(R.string.cd_skip_next),
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = buttonsModifier
+            modifier = buttonsModifier.clickable { onMediaEvent(MediaEvent.SkipNext) }
         )
     }
 }
