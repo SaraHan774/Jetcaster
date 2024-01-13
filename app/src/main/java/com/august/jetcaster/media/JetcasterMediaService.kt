@@ -14,20 +14,27 @@ import com.august.jetcaster.Graph
 import com.august.jetcaster.di.MediaModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
-class JetcasterMediaService : MediaSessionService() {
+class JetcasterMediaService : MediaSessionService(), Player.Listener {
 
     private lateinit var mediaSession: MediaSession
     private lateinit var player: Player
     private lateinit var notificationManager: NotificationManager
 
+    private var positionUpdateJob: Job? = null
+
     // NOTE: To be injected by Hilt
     private val episodeStore = Graph.episodeStore
     private val podcastStore = Graph.podcastStore
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
+
+    /* MediaService Callbacks */
 
     @OptIn(UnstableApi::class)
     override fun onCreate() {
@@ -44,6 +51,7 @@ class JetcasterMediaService : MediaSessionService() {
             mediaSession = mediaSession
         )
         setupEventListener()
+        player.addListener(this)
         return super.onStartCommand(intent, flags, startId)
     }
 
@@ -56,6 +64,7 @@ class JetcasterMediaService : MediaSessionService() {
 
     override fun onDestroy() {
         mediaSession.run {
+            player.removeListener(this@JetcasterMediaService)
             player.release()
             release()
         }
@@ -64,6 +73,57 @@ class JetcasterMediaService : MediaSessionService() {
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo) = mediaSession
+
+
+    /* Playback.Listener Callbacks */
+
+    override fun onIsPlayingChanged(isPlaying: Boolean) {
+        super.onIsPlayingChanged(isPlaying)
+        if (isPlaying) startPositionUpdate()
+        else stopPositionUpdate()
+    }
+
+    override fun onMediaMetadataChanged(mediaMetadata: MediaMetadata) {
+        super.onMediaMetadataChanged(mediaMetadata)
+        MediaBus.updateState {
+            it.copy(mediaItem = mediaMetadata)
+        }
+    }
+
+    override fun onEvents(player: Player, events: Player.Events) {
+        super.onEvents(player, events)
+        when (player.playbackState) {
+            Player.STATE_IDLE -> MediaBus.updateState {
+                it.copy(playerState = PlayerState.IDLE)
+            }
+
+            Player.STATE_BUFFERING -> MediaBus.updateState {
+                it.copy(
+                    playerState = PlayerState.BUFFERING,
+                    position = player.currentPosition
+                )
+            }
+
+            Player.STATE_READY -> MediaBus.updateState {
+                it.copy(
+                    playerState = PlayerState.READY,
+                    position = player.currentPosition,
+                    duration = player.duration
+                )
+            }
+
+            Player.STATE_ENDED -> {
+                MediaBus.updateState {
+                    it.copy(playerState = PlayerState.ENDED)
+                }
+                player.seekToDefaultPosition(0)
+                player.pause()
+            }
+        }
+    }
+
+
+    /* Private Functions */
 
     private fun setupEventListener() {
         coroutineScope.launch {
@@ -101,6 +161,7 @@ class JetcasterMediaService : MediaSessionService() {
 
         if (episode.url == null) {
             // TODO: Error handling
+            return@launch
         }
 
         // Prepare media item
@@ -119,5 +180,31 @@ class JetcasterMediaService : MediaSessionService() {
         player.setMediaItem(mediaItem)
         player.prepare()
         player.play()
+    }
+
+    private fun startPositionUpdate() {
+        if (positionUpdateJob != null) return
+        positionUpdateJob = coroutineScope.launch {
+            while (isActive) {
+                delay(500)
+                MediaBus.updateState {
+                    it.copy(
+                        position = player.currentPosition,
+                        isPlaying = true
+                    )
+                }
+            }
+        }
+    }
+
+    private fun stopPositionUpdate() {
+        positionUpdateJob?.cancel()
+        positionUpdateJob = null
+        MediaBus.updateState {
+            it.copy(
+                position = player.currentPosition,
+                isPlaying = false
+            )
+        }
     }
 }

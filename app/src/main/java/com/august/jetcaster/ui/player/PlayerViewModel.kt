@@ -33,6 +33,7 @@ import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import java.time.Duration
 
 data class PlayerUiState(
@@ -75,6 +76,12 @@ class PlayerViewModel(
                 summary = episode.summary ?: "",
                 podcastImageUrl = podcast.imageUrl ?: ""
             )
+        }
+
+        viewModelScope.launch {
+            MediaBus.state.collect {
+                Timber.i("state = $it")
+            }
         }
     }
 

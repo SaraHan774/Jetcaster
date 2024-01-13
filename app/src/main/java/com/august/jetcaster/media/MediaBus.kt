@@ -1,8 +1,13 @@
 package com.august.jetcaster.media
 
+import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
 object MediaBus {
 
@@ -12,14 +17,19 @@ object MediaBus {
     )
     val events = _events.asSharedFlow()
 
-    private val _state = MutableSharedFlow<MediaState>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val state = _state.asSharedFlow()
+    private val _state = MutableStateFlow(MediaState.INITIAL)
+    val state = _state.asStateFlow()
 
     fun sendEvent(event: MediaEvent) {
         _events.tryEmit(event)
+    }
+
+    fun updateState(newState: MediaState) {
+        _state.update { newState }
+    }
+
+    fun updateState(function: (MediaState) -> MediaState) {
+        _state.update(function)
     }
 }
 
@@ -42,6 +52,25 @@ sealed interface MediaEvent {
 
 }
 
-sealed interface MediaState {
-    data object Idle : MediaState
+data class MediaState(
+    val playerState: PlayerState,
+    val mediaItem: MediaMetadata,
+    val duration: Long,
+    val position: Long,
+    val isPlaying: Boolean
+) {
+
+    companion object {
+        val INITIAL = MediaState(
+            playerState = PlayerState.IDLE,
+            mediaItem = MediaItem.EMPTY.mediaMetadata,
+            duration = 0L,
+            position = 0L,
+            isPlaying = false
+        )
+    }
+}
+
+enum class PlayerState {
+    IDLE, BUFFERING, READY, ENDED
 }
