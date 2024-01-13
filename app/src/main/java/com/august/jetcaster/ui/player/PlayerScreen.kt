@@ -60,6 +60,8 @@ import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
+import androidx.compose.material.icons.rounded.Downloading
+import androidx.compose.material.icons.rounded.PauseCircleFilled
 import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
@@ -261,6 +263,8 @@ private fun PlayerContentRegular(
                 PlayerSlider(uiState.duration)
                 PlayerButtons(
                     Modifier.padding(vertical = 8.dp),
+                    isBuffering = uiState.isBuffering,
+                    isPlaying = uiState.isPlaying,
                     onMediaEvent = onMediaEvent
                 )
             }
@@ -333,6 +337,8 @@ private fun PlayerContentTableTopBottom(
             PlayerButtons(
                 playerButtonSize = 92.dp,
                 modifier = Modifier.padding(top = 8.dp),
+                isBuffering = uiState.isBuffering,
+                isPlaying = uiState.isPlaying,
                 onMediaEvent = onMediaEvent
             )
             PlayerSlider(uiState.duration)
@@ -394,6 +400,8 @@ private fun PlayerContentBookEnd(
         PlayerSlider(uiState.duration)
         PlayerButtons(
             Modifier.padding(vertical = 8.dp),
+            isBuffering = uiState.isBuffering,
+            isPlaying = uiState.isPlaying,
             onMediaEvent = onMediaEvent
         )
     }
@@ -520,6 +528,8 @@ private fun PlayerButtons(
     modifier: Modifier = Modifier,
     playerButtonSize: Dp = 72.dp,
     sideButtonSize: Dp = 48.dp,
+    isBuffering: Boolean,
+    isPlaying: Boolean,
     onMediaEvent: (MediaEvent) -> Unit
 ) {
     Row(
@@ -545,15 +555,25 @@ private fun PlayerButtons(
             colorFilter = ColorFilter.tint(LocalContentColor.current),
             modifier = buttonsModifier.clickable { onMediaEvent(MediaEvent.SeekBack) }
         )
+
+        val playPauseIcon = if (isBuffering) {
+            Icons.Rounded.Downloading
+        } else if (isPlaying) {
+            Icons.Rounded.PauseCircleFilled
+        } else {
+            Icons.Rounded.PlayCircleFilled
+        }
         Image(
-            imageVector = Icons.Rounded.PlayCircleFilled,
+            imageVector = playPauseIcon,
             contentDescription = stringResource(R.string.cd_play),
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(LocalContentColor.current),
             modifier = Modifier
                 .size(playerButtonSize)
                 .semantics { role = Role.Button }
-                .clickable { onMediaEvent(MediaEvent.PlayPause) }
+                .clickable {
+                    if (!isBuffering) onMediaEvent(MediaEvent.PlayPause)
+                }
         )
         Image(
             imageVector = Icons.Filled.Forward30,
@@ -627,6 +647,8 @@ fun TopAppBarPreview() {
 fun PlayerButtonsPreview() {
     JetcasterTheme {
         PlayerButtons(
+            isBuffering = false,
+            isPlaying = true,
             onMediaEvent = {}
         )
     }

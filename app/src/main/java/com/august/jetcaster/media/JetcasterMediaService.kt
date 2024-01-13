@@ -108,7 +108,8 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
                 it.copy(
                     playerState = PlayerState.READY,
                     position = player.currentPosition,
-                    duration = player.duration
+                    duration = player.duration,
+                    isPlaying = player.isPlaying
                 )
             }
 
@@ -173,6 +174,7 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
                     .setArtworkUri(Uri.parse(podcast.imageUrl))
                     .setAlbumTitle(podcast.title)
                     .setDisplayTitle(episode.title)
+                    .setDescription(episode.summary)
                     .build()
             ).build()
 

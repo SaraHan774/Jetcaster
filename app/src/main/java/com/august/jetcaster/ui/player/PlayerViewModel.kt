@@ -31,19 +31,22 @@ import com.august.jetcaster.data.EpisodeStore
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
-import kotlinx.coroutines.flow.first
+import com.august.jetcaster.media.PlayerState
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import java.time.Duration
 
 data class PlayerUiState(
     val title: String = "",
     val subTitle: String = "",
+    val position: Long = 0L,
     val duration: Duration? = null,
     val podcastName: String = "",
     val author: String = "",
     val summary: String = "",
-    val podcastImageUrl: String = ""
+    val podcastImageUrl: String = "",
+    val isPlaying: Boolean = false,
+    val isBuffering: Boolean = false,
+    val isLoading: Boolean = false,
 )
 
 /**
@@ -59,7 +62,7 @@ class PlayerViewModel(
     // If that's not the case, fail crashing the app!
     private val episodeUri: String = Uri.decode(savedStateHandle.get<String>("episodeUri")!!)
 
-    var uiState by mutableStateOf(PlayerUiState())
+    var uiState by mutableStateOf(PlayerUiState(isLoading = true))
         private set
 
     init {
@@ -67,20 +70,17 @@ class PlayerViewModel(
         onMediaEvent(MediaEvent.SetItem(uri = episodeUri))
 
         viewModelScope.launch {
-            val episode = episodeStore.episodeWithUri(episodeUri).first()
-            val podcast = podcastStore.podcastWithUri(episode.podcastUri).first()
-            uiState = PlayerUiState(
-                title = episode.title,
-                duration = episode.duration,
-                podcastName = podcast.title,
-                summary = episode.summary ?: "",
-                podcastImageUrl = podcast.imageUrl ?: ""
-            )
-        }
-
-        viewModelScope.launch {
             MediaBus.state.collect {
-                Timber.i("state = $it")
+                uiState = PlayerUiState(
+                    title = it.mediaItem.displayTitle.toString(),
+                    podcastName = it.mediaItem.albumTitle.toString(),
+                    podcastImageUrl = it.mediaItem.artworkUri?.toString() ?: "",
+                    summary = it.mediaItem.description.toString(),
+                    duration = Duration.ofMillis(it.duration),
+                    position = it.position,
+                    isPlaying = it.isPlaying,
+                    isBuffering = it.playerState == PlayerState.BUFFERING
+                )
             }
         }
     }
