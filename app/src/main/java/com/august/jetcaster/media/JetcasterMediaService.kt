@@ -2,6 +2,7 @@ package com.august.jetcaster.media
 
 import android.content.Intent
 import androidx.annotation.OptIn
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
@@ -10,12 +11,14 @@ import com.august.jetcaster.di.MediaModule
 class JetcasterMediaService : MediaSessionService() {
 
     private lateinit var mediaSession: MediaSession
+    private lateinit var player: Player
     private lateinit var notificationManager: NotificationManager
 
     @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
         mediaSession = MediaModule.provideMediaSession(this)
+        player = mediaSession.player
         notificationManager = NotificationManager(this, mediaSession.player)
     }
 
@@ -30,7 +33,6 @@ class JetcasterMediaService : MediaSessionService() {
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        val player = mediaSession.player
         if (player.playWhenReady) {
             player.pause()
         }
