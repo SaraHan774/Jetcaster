@@ -19,7 +19,6 @@ package com.august.jetcaster.ui.player
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -54,9 +53,8 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Forward30
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
@@ -419,14 +417,8 @@ private fun TopAppBar(onBackPress: () -> Unit) {
         Spacer(Modifier.weight(1f))
         IconButton(onClick = { /* TODO */ }) {
             Icon(
-                imageVector = Icons.Default.PlaylistAdd,
+                imageVector = Icons.Default.Download,
                 contentDescription = stringResource(R.string.cd_add)
-            )
-        }
-        IconButton(onClick = { /* TODO */ }) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = stringResource(R.string.cd_more)
             )
         }
     }
@@ -549,20 +541,29 @@ private fun PlayerButtons(
             .size(sideButtonSize)
             .semantics { role = Role.Button }
 
-        Image(
-            imageVector = Icons.Filled.SkipPrevious,
-            contentDescription = stringResource(R.string.cd_skip_previous),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = buttonsModifier.clickable { onMediaEvent(MediaEvent.SkipPrev) }
-        )
-        Image(
-            imageVector = Icons.Filled.Replay10,
-            contentDescription = stringResource(R.string.cd_reply10),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = buttonsModifier.clickable { onMediaEvent(MediaEvent.SeekBack) }
-        )
+        IconButton(
+            onClick = { onMediaEvent(MediaEvent.SkipPrev) }
+        ) {
+            Image(
+                imageVector = Icons.Filled.SkipPrevious,
+                contentDescription = stringResource(R.string.cd_skip_previous),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                modifier = buttonsModifier
+            )
+        }
+
+        IconButton(
+            onClick = { onMediaEvent(MediaEvent.SeekBack) }
+        ) {
+            Image(
+                imageVector = Icons.Filled.Replay10,
+                contentDescription = stringResource(R.string.cd_reply10),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                modifier = buttonsModifier
+            )
+        }
 
         val playPauseIcon = if (isBuffering) {
             Icons.Rounded.Downloading
@@ -571,32 +572,43 @@ private fun PlayerButtons(
         } else {
             Icons.Rounded.PlayCircleFilled
         }
-        Image(
-            imageVector = playPauseIcon,
-            contentDescription = stringResource(R.string.cd_play),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = Modifier
-                .size(playerButtonSize)
-                .semantics { role = Role.Button }
-                .clickable {
-                    if (!isBuffering) onMediaEvent(MediaEvent.PlayPause)
-                }
-        )
-        Image(
-            imageVector = Icons.Filled.Forward30,
-            contentDescription = stringResource(R.string.cd_forward30),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = buttonsModifier.clickable { onMediaEvent(MediaEvent.SeekForward) }
-        )
-        Image(
-            imageVector = Icons.Filled.SkipNext,
-            contentDescription = stringResource(R.string.cd_skip_next),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = buttonsModifier.clickable { onMediaEvent(MediaEvent.SkipNext) }
-        )
+        IconButton(
+            onClick = { if (!isBuffering) onMediaEvent(MediaEvent.PlayPause) }
+        ) {
+            Image(
+                imageVector = playPauseIcon,
+                contentDescription = stringResource(R.string.cd_play),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                modifier = Modifier
+                    .size(playerButtonSize)
+                    .semantics { role = Role.Button }
+            )
+        }
+
+        IconButton(
+            onClick = { onMediaEvent(MediaEvent.SeekForward) }
+        ) {
+            Image(
+                imageVector = Icons.Filled.Forward30,
+                contentDescription = stringResource(R.string.cd_forward30),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                modifier = buttonsModifier
+            )
+        }
+
+        IconButton(
+            onClick = { onMediaEvent(MediaEvent.SkipNext) }
+        ) {
+            Image(
+                imageVector = Icons.Filled.SkipNext,
+                contentDescription = stringResource(R.string.cd_skip_next),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                modifier = buttonsModifier
+            )
+        }
     }
 }
 
