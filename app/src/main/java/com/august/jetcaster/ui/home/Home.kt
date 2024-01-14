@@ -61,7 +61,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.august.jetcaster.R
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.ui.home.discover.Discover
