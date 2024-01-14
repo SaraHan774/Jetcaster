@@ -16,8 +16,6 @@
 
 package com.august.jetcaster.ui.home.category
 
-import android.app.Activity
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -51,7 +49,6 @@ import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -60,7 +57,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSavedStateRegistryOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
@@ -71,12 +67,8 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension.Companion.fillToConstraints
 import androidx.constraintlayout.compose.Dimension.Companion.preferredWrapContent
-import androidx.core.os.bundleOf
-import androidx.hilt.navigation.HiltViewModelFactory
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.august.jetcaster.R
@@ -90,10 +82,10 @@ import com.august.jetcaster.ui.home.PreviewPodcasts
 import com.august.jetcaster.ui.theme.JetcasterTheme
 import com.august.jetcaster.ui.theme.Keyline1
 import com.august.jetcaster.util.ToggleFollowPodcastIconButton
+import com.august.jetcaster.util.findActivity
 import dagger.hilt.android.EntryPointAccessors
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import javax.inject.Inject
 
 @Composable
 fun PodcastCategory(
@@ -102,7 +94,7 @@ fun PodcastCategory(
     modifier: Modifier = Modifier
 ) {
     val factory = EntryPointAccessors.fromActivity(
-        LocalContext.current as Activity,
+        LocalContext.current.findActivity(),
         ViewModelFactoryProvider::class.java
     ).podcastsCategoryViewModelFactory()
 
