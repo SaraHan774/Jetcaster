@@ -17,22 +17,18 @@
 package com.august.jetcaster.ui.player
 
 import android.net.Uri
-import android.os.Bundle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.AbstractSavedStateViewModelFactory
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.savedstate.SavedStateRegistryOwner
-import com.august.jetcaster.Graph
-import com.august.jetcaster.data.EpisodeStore
-import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.media.PlayerState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 data class PlayerUiState(
     val title: String = "",
@@ -51,11 +47,8 @@ data class PlayerUiState(
 /**
  * ViewModel that handles the business logic and screen state of the Player screen
  */
-class PlayerViewModel(
-    episodeStore: EpisodeStore,
-    podcastStore: PodcastStore,
-    savedStateHandle: SavedStateHandle
-) : ViewModel() {
+@HiltViewModel
+class PlayerViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     // episodeUri should always be present in the PlayerViewModel.
     // If that's not the case, fail crashing the app!
@@ -86,27 +79,5 @@ class PlayerViewModel(
 
     fun onMediaEvent(event: MediaEvent) {
         MediaBus.sendEvent(event)
-    }
-
-    /**
-     * Factory for PlayerViewModel that takes EpisodeStore and PodcastStore as a dependency
-     */
-    companion object {
-        fun provideFactory(
-            episodeStore: EpisodeStore = Graph.episodeStore,
-            podcastStore: PodcastStore = Graph.podcastStore,
-            owner: SavedStateRegistryOwner,
-            defaultArgs: Bundle? = null,
-        ): AbstractSavedStateViewModelFactory =
-            object : AbstractSavedStateViewModelFactory(owner, defaultArgs) {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(
-                    key: String,
-                    modelClass: Class<T>,
-                    handle: SavedStateHandle
-                ): T {
-                    return PlayerViewModel(episodeStore, podcastStore, handle) as T
-                }
-            }
     }
 }

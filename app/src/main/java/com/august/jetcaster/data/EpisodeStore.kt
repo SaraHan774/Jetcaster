@@ -18,11 +18,12 @@ package com.august.jetcaster.data
 
 import com.august.jetcaster.data.room.EpisodesDao
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
 /**
  * A data repository for [Episode] instances.
  */
-class EpisodeStore(
+class EpisodeStore @Inject constructor(
     private val episodesDao: EpisodesDao
 ) {
     /**
