@@ -7,11 +7,16 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.MediaSession
+import com.august.jetcaster.media.NotificationManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityComponent
+import dagger.hilt.android.components.ServiceComponent
+import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 
 // NOTE: Later should be part be a Hilt Module.
 
@@ -19,6 +24,7 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 object MediaModule {
 
+    @Singleton
     @Provides
     fun provideAudioAttributes(): AudioAttributes = AudioAttributes.Builder()
         .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
@@ -26,6 +32,7 @@ object MediaModule {
         .build()
 
     @UnstableApi
+    @Singleton
     @Provides
     fun providePlayer(
         @ApplicationContext context: Context,
@@ -38,7 +45,15 @@ object MediaModule {
         .setSeekForwardIncrementMs(30 * 1_000)
         .build()
 
+    @Singleton
+    @Provides
+    fun provideNotificationManager(
+        @ApplicationContext context: Context,
+        player: ExoPlayer
+    ) : NotificationManager = NotificationManager(context, player)
+
     @UnstableApi
+    @Singleton
     @Provides
     fun provideMediaSession(
         @ApplicationContext context: Context,

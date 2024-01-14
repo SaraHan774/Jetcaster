@@ -28,12 +28,10 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
 
     @Inject
     lateinit var mediaSession: MediaSession
-    private lateinit var player: Player
-    private lateinit var notificationManager: NotificationManager
 
-    private var positionUpdateJob: Job? = null
+    @Inject
+    lateinit var notificationManager: NotificationManager
 
-    // NOTE: To be injected by Hilt
     @Inject
     lateinit var episodeStore: EpisodeStore
 
@@ -44,15 +42,15 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
     @Inject
     lateinit var coroutineScope: CoroutineScope
 
-    /* MediaService Callbacks */
+    private lateinit var player: Player
+
+    private var positionUpdateJob: Job? = null
 
     @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
-        player = mediaSession.player
-        notificationManager = NotificationManager(this, mediaSession.player)
-
         setupEventListener()
+        player = mediaSession.player
         player.addListener(this)
     }
 
