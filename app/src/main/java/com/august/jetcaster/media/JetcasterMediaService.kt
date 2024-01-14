@@ -42,6 +42,9 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
         mediaSession = MediaModule.provideMediaSession(this)
         player = mediaSession.player
         notificationManager = NotificationManager(this, mediaSession.player)
+
+        setupEventListener()
+        player.addListener(this)
     }
 
     @UnstableApi
@@ -50,8 +53,6 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
             mediaSessionService = this,
             mediaSession = mediaSession
         )
-        setupEventListener()
-        player.addListener(this)
         return super.onStartCommand(intent, flags, startId)
     }
 
