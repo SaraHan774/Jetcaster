@@ -64,20 +64,6 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideCategoryStore(
-        categoriesDao: CategoriesDao,
-        categoryEntryDao: PodcastCategoryEntryDao,
-        episodesDao: EpisodesDao,
-        podcastsDao: PodcastsDao,
-    ) = CategoryStore(
-        categoriesDao = categoriesDao,
-        categoryEntryDao = categoryEntryDao,
-        episodesDao = episodesDao,
-        podcastsDao = podcastsDao
-    )
-
-    @Singleton
-    @Provides
     fun provideEpisodeStore(
         episodesDao: EpisodesDao,
     ) = EpisodeStore(episodesDao = episodesDao)
@@ -85,18 +71,6 @@ object AppModule {
     @Singleton
     @Provides
     fun provideTransactionRunner(db: JetcasterDatabase): TransactionRunner = db.transactionRunnerDao()
-
-    @Singleton
-    @Provides
-    fun providePodcastStore(
-        podcastDao: PodcastsDao,
-        podcastFollowedEntryDao: PodcastFollowedEntryDao,
-        transactionRunner: TransactionRunner
-    ) = PodcastStore(
-        podcastDao = podcastDao,
-        podcastFollowedEntryDao = podcastFollowedEntryDao,
-        transactionRunner = transactionRunner
-    )
 
     @Singleton
     @Provides
@@ -112,16 +86,4 @@ object AppModule {
     @Singleton
     @Provides
     fun provideSyndFeedInput() = SyndFeedInput()
-
-    @Singleton
-    @Provides
-    fun providePodcastFetcher(
-        okHttpClient: OkHttpClient,
-        syndFeedInput: SyndFeedInput,
-        @IODispatcher ioDispatcher: CoroutineDispatcher
-    ) = PodcastsFetcher(
-        okHttpClient,
-        syndFeedInput,
-        ioDispatcher
-    )
 }
