@@ -31,11 +31,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
@@ -43,14 +47,17 @@ import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlaylistAdd
 import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -84,6 +91,7 @@ import com.august.jetcaster.ui.theme.Keyline1
 import com.august.jetcaster.util.ToggleFollowPodcastIconButton
 import com.august.jetcaster.util.findActivity
 import dagger.hilt.android.EntryPointAccessors
+import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -107,17 +115,30 @@ fun PodcastCategory(
         factory = PodcastCategoryViewModel.provideFactory(factory, categoryId)
     )
     val viewState by viewModel.state.collectAsStateWithLifecycle()
+    val lazyListState = rememberLazyListState()
+    val firstVisibleItemIndex by remember { derivedStateOf { lazyListState.firstVisibleItemIndex } }
+    val scope = rememberCoroutineScope()
 
-    /**
-     * TODO: reset scroll position when category changes
-     */
     Column(modifier = modifier) {
-        EpisodeList(
-            viewState.episodes,
-            viewState.topPodcasts,
-            navigateToPlayer,
-            viewModel::onTogglePodcastFollowed
-        )
+        Box(contentAlignment = Alignment.BottomEnd) {
+            EpisodeList(
+                viewState.episodes,
+                viewState.topPodcasts,
+                navigateToPlayer,
+                viewModel::onTogglePodcastFollowed,
+                lazyListState = lazyListState
+            )
+
+            if (lazyListState.isScrollInProgress.not() && firstVisibleItemIndex != 0) {
+                FloatingActionButton(
+                    modifier = Modifier.padding(24.dp),
+                    onClick = { scope.launch { lazyListState.scrollToItem(0) } },
+                    shape = CircleShape,
+                ) {
+                    Icon(Icons.Filled.ArrowUpward, "Upward Arrow Icon")
+                }
+            }
+        }
     }
 }
 
@@ -139,9 +160,11 @@ private fun EpisodeList(
     topPodcasts: List<PodcastWithExtraInfo>,
     navigateToPlayer: (String) -> Unit,
     onTogglePodcastFollowed: (String) -> Unit,
+    lazyListState: LazyListState,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
+        state = lazyListState,
         verticalArrangement = Arrangement.Center
     ) {
         item {
