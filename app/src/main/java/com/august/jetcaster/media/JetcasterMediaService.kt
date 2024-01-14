@@ -10,7 +10,8 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
-import com.august.jetcaster.Graph
+import com.august.jetcaster.data.EpisodeStore
+import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.di.MediaModule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -29,9 +30,11 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
 
     private var positionUpdateJob: Job? = null
 
-    // NOTE: To be injected by Hilt
-    private val episodeStore = Graph.episodeStore
-    private val podcastStore = Graph.podcastStore
+    // NOTE: To be injected by Hilt: 사라님 부탁 드려요.
+//    private val episodeStore = Graph.episodeStore
+//    private val podcastStore = Graph.podcastStore
+    private lateinit var episodeStore: EpisodeStore
+    private lateinit var podcastStore: PodcastStore
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     /* MediaService Callbacks */
