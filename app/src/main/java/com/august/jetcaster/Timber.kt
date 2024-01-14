@@ -13,11 +13,10 @@ class JetCasterTree : Timber.DebugTree() {
 
     private fun getMethodName(): Pair<String, String> {
         val trace = Throwable().stackTrace.first { it.className !in fqcnIgnore }
-        val className = trace.className
-            .substringAfterLast('.')
-            .substring(0, MAX_CLASS_NAME_LENGTH)
+        val originalClassName = trace.className.substringAfterLast('.')
+        val className = if (originalClassName.length < MAX_CLASS_NAME_LENGTH) originalClassName
+        else originalClassName.substring(0, MAX_CLASS_NAME_LENGTH)
         return className to trace.methodName
-
     }
 
     companion object {

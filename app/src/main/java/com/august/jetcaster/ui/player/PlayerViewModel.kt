@@ -23,52 +23,61 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.august.jetcaster.data.EpisodeStore
-import com.august.jetcaster.data.PodcastStore
+import com.august.jetcaster.media.MediaBus
+import com.august.jetcaster.media.MediaEvent
+import com.august.jetcaster.media.PlayerState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.time.Duration
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PlayerUiState(
     val title: String = "",
     val subTitle: String = "",
-    val duration: Duration? = null,
+    val position: Long = 0L,
+    val duration: Long = 0L,
     val podcastName: String = "",
     val author: String = "",
     val summary: String = "",
-    val podcastImageUrl: String = ""
+    val podcastImageUrl: String = "",
+    val isPlaying: Boolean = false,
+    val isBuffering: Boolean = false,
+    val isLoading: Boolean = false,
 )
 
 /**
  * ViewModel that handles the business logic and screen state of the Player screen
  */
 @HiltViewModel
-class PlayerViewModel @Inject constructor(
-    episodeStore: EpisodeStore,
-    podcastStore: PodcastStore,
-    savedStateHandle: SavedStateHandle
-) : ViewModel() {
+class PlayerViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     // episodeUri should always be present in the PlayerViewModel.
     // If that's not the case, fail crashing the app!
+    private val episodeUri: String = Uri.decode(savedStateHandle.get<String>("episodeUri")!!)
 
-    var uiState by mutableStateOf(PlayerUiState())
+    var uiState by mutableStateOf(PlayerUiState(isLoading = true))
         private set
 
     init {
-        val episodeUri: String = Uri.decode(savedStateHandle.get<String>("episodeUri")!!)
+        // NOTE: Temporary
+        onMediaEvent(MediaEvent.SetItem(uri = episodeUri))
+
         viewModelScope.launch {
-            val episode = episodeStore.episodeWithUri(episodeUri).first()
-            val podcast = podcastStore.podcastWithUri(episode.podcastUri).first()
-            uiState = PlayerUiState(
-                title = episode.title,
-                duration = episode.duration,
-                podcastName = podcast.title,
-                summary = episode.summary ?: "",
-                podcastImageUrl = podcast.imageUrl ?: ""
-            )
+            MediaBus.state.collect {
+                uiState = PlayerUiState(
+                    title = it.mediaItem.displayTitle.toString(),
+                    podcastName = it.mediaItem.albumTitle.toString(),
+                    podcastImageUrl = it.mediaItem.artworkUri?.toString() ?: "",
+                    summary = it.mediaItem.description.toString(),
+                    duration = it.duration,
+                    position = it.position,
+                    isPlaying = it.isPlaying,
+                    isBuffering = it.playerState == PlayerState.BUFFERING
+                )
+            }
         }
+    }
+
+    fun onMediaEvent(event: MediaEvent) {
+        MediaBus.sendEvent(event)
     }
 }

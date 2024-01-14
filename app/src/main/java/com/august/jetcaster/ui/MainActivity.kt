@@ -16,6 +16,7 @@
 
 package com.august.jetcaster.ui
 
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -24,6 +25,8 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.core.content.ContextCompat
+import com.august.jetcaster.media.JetcasterMediaService
 import com.august.jetcaster.ui.home.category.PodcastCategoryViewModelFactory
 import com.august.jetcaster.ui.theme.JetcasterTheme
 import com.google.accompanist.adaptive.calculateDisplayFeatures
@@ -36,6 +39,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        startService()
 
         enableEdgeToEdge(
             // This app is only ever in dark mode, so hard code detectDarkMode to true.
@@ -53,5 +57,10 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    private fun startService() {
+        val intent = Intent(this, JetcasterMediaService::class.java)
+        ContextCompat.startForegroundService(this, intent)
     }
 }
