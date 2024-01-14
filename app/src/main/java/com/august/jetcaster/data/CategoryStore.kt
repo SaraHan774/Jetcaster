@@ -21,11 +21,14 @@ import com.august.jetcaster.data.room.EpisodesDao
 import com.august.jetcaster.data.room.PodcastCategoryEntryDao
 import com.august.jetcaster.data.room.PodcastsDao
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * A data repository for [Category] instances.
  */
-class CategoryStore(
+@Singleton
+class CategoryStore @Inject constructor(
     private val categoriesDao: CategoriesDao,
     private val categoryEntryDao: PodcastCategoryEntryDao,
     private val episodesDao: EpisodesDao,

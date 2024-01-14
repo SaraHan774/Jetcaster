@@ -17,23 +17,26 @@
 package com.august.jetcaster.data
 
 import com.august.jetcaster.data.room.TransactionRunner
+import com.august.jetcaster.di.modules.MainDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Data repository for Podcasts.
  */
-class PodcastsRepository(
+class PodcastsRepository @Inject constructor(
     private val podcastsFetcher: PodcastsFetcher,
     private val podcastStore: PodcastStore,
     private val episodeStore: EpisodeStore,
     private val categoryStore: CategoryStore,
     private val transactionRunner: TransactionRunner,
-    mainDispatcher: CoroutineDispatcher
+    @MainDispatcher mainDispatcher: CoroutineDispatcher
 ) {
     private var refreshingJob: Job? = null
 

@@ -17,12 +17,14 @@
 package com.august.jetcaster.data
 
 import coil.network.HttpException
+import com.august.jetcaster.di.modules.IODispatcher
 import com.rometools.modules.itunes.EntryInformation
 import com.rometools.modules.itunes.FeedInformation
 import com.rometools.rome.feed.synd.SyndEntry
 import com.rometools.rome.feed.synd.SyndFeed
 import com.rometools.rome.io.SyndFeedInput
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.catch
@@ -36,6 +38,8 @@ import java.time.Duration
 import java.time.Instant
 import java.time.ZoneOffset
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * A class which fetches some selected podcast RSS feeds.
@@ -44,10 +48,11 @@ import java.util.concurrent.TimeUnit
  * @param syndFeedInput [SyndFeedInput] to use for parsing RSS feeds.
  * @param ioDispatcher [CoroutineDispatcher] to use for running fetch requests.
  */
-class PodcastsFetcher(
+@Singleton
+class PodcastsFetcher @Inject constructor(
     private val okHttpClient: OkHttpClient,
     private val syndFeedInput: SyndFeedInput,
-    private val ioDispatcher: CoroutineDispatcher
+    @IODispatcher private val ioDispatcher: CoroutineDispatcher
 ) {
 
     /**
@@ -65,6 +70,7 @@ class PodcastsFetcher(
      * The feeds are fetched concurrently, meaning that the resulting emission order may not
      * match the order of [feedUrls].
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     operator fun invoke(feedUrls: List<String>): Flow<PodcastRssResponse> {
         // We use flatMapMerge here to achieve concurrent fetching/parsing of the feeds.
         return feedUrls.asFlow()

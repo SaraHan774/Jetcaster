@@ -76,12 +76,14 @@ import com.august.jetcaster.data.Episode
 import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.Podcast
 import com.august.jetcaster.data.PodcastWithExtraInfo
+import com.august.jetcaster.di.modules.ViewModelFactoryProvider
 import com.august.jetcaster.ui.home.PreviewEpisodes
 import com.august.jetcaster.ui.home.PreviewPodcasts
 import com.august.jetcaster.ui.theme.JetcasterTheme
 import com.august.jetcaster.ui.theme.Keyline1
 import com.august.jetcaster.util.ToggleFollowPodcastIconButton
-import com.august.jetcaster.util.viewModelProviderFactoryOf
+import com.august.jetcaster.util.findActivity
+import dagger.hilt.android.EntryPointAccessors
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
@@ -91,16 +93,19 @@ fun PodcastCategory(
     navigateToPlayer: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val factory = EntryPointAccessors.fromActivity(
+        LocalContext.current.findActivity(),
+        ViewModelFactoryProvider::class.java
+    ).podcastsCategoryViewModelFactory()
+
     /**
      * CategoryEpisodeListViewModel requires the category as part of it's constructor, therefore
      * we need to assist with it's instantiation with a custom factory and custom key.
      */
     val viewModel: PodcastCategoryViewModel = viewModel(
-        // We use a custom key, using the category parameter
         key = "category_list_$categoryId",
-        factory = viewModelProviderFactoryOf { PodcastCategoryViewModel(categoryId) }
+        factory = PodcastCategoryViewModel.provideFactory(factory, categoryId)
     )
-
     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
     /**
@@ -318,7 +323,7 @@ private fun CategoryPodcastRow(
         contentPadding = PaddingValues(start = Keyline1, top = 8.dp, end = Keyline1, bottom = 24.dp)
     ) {
         itemsIndexed(items = podcasts) { index: Int,
-            (podcast, _, isFollowed): PodcastWithExtraInfo ->
+                                         (podcast, _, isFollowed): PodcastWithExtraInfo ->
             TopPodcastRowItem(
                 podcastTitle = podcast.title,
                 podcastImageUrl = podcast.imageUrl,

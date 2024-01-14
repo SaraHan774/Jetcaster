@@ -19,16 +19,14 @@ package com.august.jetcaster
 import android.app.Application
 import coil.ImageLoader
 import coil.ImageLoaderFactory
+import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
 
-/**
- * Application which sets up our dependency [Graph] with a context.
- */
+@HiltAndroidApp
 class JetcasterApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         setupTimber()
-        Graph.provide(this)
     }
 
     override fun newImageLoader(): ImageLoader {
