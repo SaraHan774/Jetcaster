@@ -22,10 +22,12 @@ import com.august.jetcaster.data.room.PodcastCategoryEntryDao
 import com.august.jetcaster.data.room.PodcastsDao
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * A data repository for [Category] instances.
  */
+@Singleton
 class CategoryStore @Inject constructor(
     private val categoriesDao: CategoriesDao,
     private val categoryEntryDao: PodcastCategoryEntryDao,
