@@ -64,12 +64,6 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideEpisodeStore(
-        episodesDao: EpisodesDao,
-    ) = EpisodeStore(episodesDao = episodesDao)
-
-    @Singleton
-    @Provides
     fun provideTransactionRunner(db: JetcasterDatabase): TransactionRunner = db.transactionRunnerDao()
 
     @Singleton
