@@ -3,10 +3,6 @@ package com.august.jetcaster.di.modules
 import android.content.Context
 import androidx.room.Room
 import com.august.jetcaster.BuildConfig
-import com.august.jetcaster.data.CategoryStore
-import com.august.jetcaster.data.EpisodeStore
-import com.august.jetcaster.data.PodcastStore
-import com.august.jetcaster.data.PodcastsFetcher
 import com.august.jetcaster.data.room.CategoriesDao
 import com.august.jetcaster.data.room.EpisodesDao
 import com.august.jetcaster.data.room.JetcasterDatabase
@@ -20,7 +16,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.LoggingEventListener
