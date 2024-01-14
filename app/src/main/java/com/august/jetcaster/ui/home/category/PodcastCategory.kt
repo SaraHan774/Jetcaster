@@ -112,19 +112,23 @@ fun PodcastCategory(
      * TODO: reset scroll position when category changes
      */
     Column(modifier = modifier) {
-        CategoryPodcasts(viewState.topPodcasts, viewModel)
-        EpisodeList(viewState.episodes, navigateToPlayer)
+        EpisodeList(
+            viewState.episodes,
+            viewState.topPodcasts,
+            navigateToPlayer,
+            viewModel::onTogglePodcastFollowed
+        )
     }
 }
 
 @Composable
 private fun CategoryPodcasts(
     topPodcasts: List<PodcastWithExtraInfo>,
-    viewModel: PodcastCategoryViewModel
+    onTogglePodcastFollowed: (String) -> Unit,
 ) {
     CategoryPodcastRow(
         podcasts = topPodcasts,
-        onTogglePodcastFollowed = viewModel::onTogglePodcastFollowed,
+        onTogglePodcastFollowed = onTogglePodcastFollowed,
         modifier = Modifier.fillMaxWidth()
     )
 }
@@ -132,12 +136,17 @@ private fun CategoryPodcasts(
 @Composable
 private fun EpisodeList(
     episodes: List<EpisodeToPodcast>,
-    navigateToPlayer: (String) -> Unit
+    topPodcasts: List<PodcastWithExtraInfo>,
+    navigateToPlayer: (String) -> Unit,
+    onTogglePodcastFollowed: (String) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        item {
+            CategoryPodcasts(topPodcasts, onTogglePodcastFollowed)
+        }
 
         items(episodes, key = { it.episode.uri }) { item ->
             EpisodeListItem(
