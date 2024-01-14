@@ -33,7 +33,6 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
 
     private var positionUpdateJob: Job? = null
 
-    // NOTE: To be injected by Hilt
     @Inject
     lateinit var episodeStore: EpisodeStore
 
@@ -43,7 +42,6 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
     @ServiceScope
     @Inject
     lateinit var coroutineScope: CoroutineScope
-
     /* MediaService Callbacks */
 
     @OptIn(UnstableApi::class)

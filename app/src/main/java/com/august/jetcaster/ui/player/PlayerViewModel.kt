@@ -23,8 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.august.jetcaster.data.EpisodeStore
-import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.media.PlayerState
@@ -50,14 +48,7 @@ data class PlayerUiState(
  * ViewModel that handles the business logic and screen state of the Player screen
  */
 @HiltViewModel
-class PlayerViewModel @Inject constructor(
-    episodeStore: EpisodeStore,
-    podcastStore: PodcastStore,
-    savedStateHandle: SavedStateHandle
-) : ViewModel() {
-
-    // episodeUri should always be present in the PlayerViewModel.
-    // If that's not the case, fail crashing the app!
+class PlayerViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel() {
 
     var uiState by mutableStateOf(PlayerUiState(isLoading = true))
         private set
