@@ -27,7 +27,6 @@ class JetcasterApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         setupTimber()
-        // Graph.provide(this)
     }
 
     override fun newImageLoader(): ImageLoader {

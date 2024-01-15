@@ -12,40 +12,48 @@ import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.august.jetcaster.data.EpisodeStore
 import com.august.jetcaster.data.PodcastStore
-import com.august.jetcaster.di.MediaModule
+import com.august.jetcaster.di.modules.ServiceScope
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class JetcasterMediaService : MediaSessionService(), Player.Listener {
 
-    private lateinit var mediaSession: MediaSession
+    @Inject
+    lateinit var mediaSession: MediaSession
+
+    @Inject
+    lateinit var notificationManager: NotificationManager
+
+    @Inject
+    lateinit var episodeStore: EpisodeStore
+
+    @Inject
+    lateinit var podcastStore: PodcastStore
+
+    @ServiceScope
+    @Inject
+    lateinit var coroutineScope: CoroutineScope
+
     private lateinit var player: Player
-    private lateinit var notificationManager: NotificationManager
 
     private var positionUpdateJob: Job? = null
-
-    // NOTE: To be injected by Hilt: 사라님 부탁 드려요.
-//    private val episodeStore = Graph.episodeStore
-//    private val podcastStore = Graph.podcastStore
-    private lateinit var episodeStore: EpisodeStore
-    private lateinit var podcastStore: PodcastStore
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
-
-    /* MediaService Callbacks */
 
     @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
-        mediaSession = MediaModule.provideMediaSession(this)
-        player = mediaSession.player
-        notificationManager = NotificationManager(this, mediaSession.player)
+        init()
+    }
 
+    private fun init() {
+        player = mediaSession.player
         setupEventListener()
         player.addListener(this)
     }

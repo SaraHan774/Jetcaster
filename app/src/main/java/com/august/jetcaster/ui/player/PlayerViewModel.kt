@@ -50,15 +50,12 @@ data class PlayerUiState(
 @HiltViewModel
 class PlayerViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel() {
 
-    // episodeUri should always be present in the PlayerViewModel.
-    // If that's not the case, fail crashing the app!
-    private val episodeUri: String = Uri.decode(savedStateHandle.get<String>("episodeUri")!!)
-
     var uiState by mutableStateOf(PlayerUiState(isLoading = true))
         private set
 
     init {
         // NOTE: Temporary
+        val episodeUri: String = Uri.decode(savedStateHandle.get<String>("episodeUri")!!)
         onMediaEvent(MediaEvent.SetItem(uri = episodeUri))
 
         viewModelScope.launch {
