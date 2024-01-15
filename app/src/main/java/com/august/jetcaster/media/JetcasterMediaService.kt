@@ -49,8 +49,12 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
     @OptIn(UnstableApi::class)
     override fun onCreate() {
         super.onCreate()
-        setupEventListener()
+        init()
+    }
+
+    private fun init() {
         player = mediaSession.player
+        setupEventListener()
         player.addListener(this)
     }
 
