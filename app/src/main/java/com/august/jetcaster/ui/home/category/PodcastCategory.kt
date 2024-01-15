@@ -109,14 +109,12 @@ fun PodcastCategory(
     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
-        Box(contentAlignment = Alignment.BottomEnd) {
-            EpisodeList(
-                viewState.episodes,
-                viewState.topPodcasts,
-                navigateToPlayer,
-                viewModel::onTogglePodcastFollowed,
-            )
-        }
+        EpisodeList(
+            viewState.episodes,
+            viewState.topPodcasts,
+            navigateToPlayer,
+            viewModel::onTogglePodcastFollowed,
+        )
     }
 }
 
