@@ -145,13 +145,12 @@ fun PlayerBar(
 private fun PlayerBarPreview() {
 
     val uiState = PlayerBarUiState(
-        uri = "940aff77-a01a-4bbd-915a-514dd3745126",
         title = "The Maine Potato War of 1976 And Some Random Text to Make it Longer",
         podcastImageUrl = "https://media.npr.org/assets/img/2022/10/24/pm_new_tile_2022_sq" +
                 "-b4af5aab11c84cfae38eafa1db74a6da943d4e7f.jpg?s=1400&c=66&f=jpg",
         isPlaying = false,
         isBuffering = false,
-        isLoading = false
+        isIdle = false
     )
 
     PlayerBar(

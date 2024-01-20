@@ -16,6 +16,7 @@
 
 package com.august.jetcaster.ui.home
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -94,11 +95,15 @@ fun Home(
                 modifier = Modifier.fillMaxSize()
             )
 
-            PlayerBar(
+            AnimatedVisibility(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                uiState = playerBarUiState,
-                onMediaEvent = {}
-            )
+                visible = !playerBarUiState.isIdle
+            ) {
+                PlayerBar(
+                    uiState = playerBarUiState,
+                    onMediaEvent = viewModel::onMediaEvent
+                )
+            }
         }
     }
 }
