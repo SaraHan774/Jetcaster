@@ -20,6 +20,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,6 +67,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.august.jetcaster.R
 import com.august.jetcaster.data.PodcastWithExtraInfo
+import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.ui.home.discover.Discover
 import com.august.jetcaster.ui.home.playerbar.PlayerBar
 import com.august.jetcaster.ui.theme.MinContrastOfPrimaryVsSurface
@@ -77,7 +79,7 @@ import kotlinx.collections.immutable.PersistentList
 
 @Composable
 fun Home(
-    navigateToPlayer: (String) -> Unit,
+    navigateToPlayer: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val viewState by viewModel.state.collectAsStateWithLifecycle()
@@ -91,12 +93,19 @@ fun Home(
                 homeCategories = viewState.homeCategories,
                 selectedHomeCategory = viewState.selectedHomeCategory,
                 onCategorySelected = viewModel::onHomeCategorySelected,
-                navigateToPlayer = navigateToPlayer,
+                navigateToPlayer = {
+                    viewModel.onMediaEvent(MediaEvent.SetItem(uri = it))
+                    navigateToPlayer()
+                },
                 modifier = Modifier.fillMaxSize()
             )
 
             AnimatedVisibility(
-                modifier = Modifier.align(Alignment.BottomCenter),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .clickable {
+                        navigateToPlayer()
+                    },
                 visible = !playerBarUiState.isIdle
             ) {
                 PlayerBar(

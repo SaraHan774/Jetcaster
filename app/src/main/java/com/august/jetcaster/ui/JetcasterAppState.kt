@@ -19,7 +19,6 @@ package com.august.jetcaster.ui
 import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.Build
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,10 +36,8 @@ import androidx.navigation.compose.rememberNavController
  * List of screens for [JetcasterApp]
  */
 sealed class Screen(val route: String) {
-    object Home : Screen("home")
-    object Player : Screen("player/{episodeUri}") {
-        fun createRoute(episodeUri: String) = "player/$episodeUri"
-    }
+    data object Home : Screen("home")
+    data object Player : Screen("player")
 }
 
 @Composable
@@ -62,11 +59,10 @@ class JetcasterAppState(
         isOnline = checkIfOnline()
     }
 
-    fun navigateToPlayer(episodeUri: String, from: NavBackStackEntry) {
+    fun navigateToPlayer(from: NavBackStackEntry) {
         // In order to discard duplicated navigation events, we check the Lifecycle
         if (from.lifecycleIsResumed()) {
-            val encodedUri = Uri.encode(episodeUri)
-            navController.navigate(Screen.Player.createRoute(encodedUri))
+            navController.navigate(Screen.Player.route)
         }
     }
 
@@ -81,7 +77,7 @@ class JetcasterAppState(
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val capabilities = cm?.getNetworkCapabilities(cm.activeNetwork) ?: return false
             capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+                    capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
         } else {
             cm?.activeNetworkInfo?.isConnectedOrConnecting == true
         }

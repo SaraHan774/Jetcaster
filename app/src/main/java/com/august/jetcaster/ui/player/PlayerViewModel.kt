@@ -16,11 +16,9 @@
 
 package com.august.jetcaster.ui.player
 
-import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.august.jetcaster.media.MediaBus
@@ -48,16 +46,12 @@ data class PlayerUiState(
  * ViewModel that handles the business logic and screen state of the Player screen
  */
 @HiltViewModel
-class PlayerViewModel @Inject constructor(savedStateHandle: SavedStateHandle) : ViewModel() {
+class PlayerViewModel @Inject constructor() : ViewModel() {
 
     var uiState by mutableStateOf(PlayerUiState(isLoading = true))
         private set
 
     init {
-        // NOTE: Temporary
-        val episodeUri: String = Uri.decode(savedStateHandle.get<String>("episodeUri")!!)
-        onMediaEvent(MediaEvent.SetItem(uri = episodeUri))
-
         viewModelScope.launch {
             MediaBus.state.collect {
                 uiState = PlayerUiState(
