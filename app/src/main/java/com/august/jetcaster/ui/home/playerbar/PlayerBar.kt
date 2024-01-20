@@ -1,38 +1,23 @@
 package com.august.jetcaster.ui.home.playerbar
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Forward30
-import androidx.compose.material.icons.filled.Replay10
-import androidx.compose.material.icons.rounded.Downloading
-import androidx.compose.material.icons.rounded.PauseCircleFilled
-import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.august.jetcaster.R
 import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.ui.home.PlayerBarUiState
+import com.august.jetcaster.ui.player.PlayerButtons
 import com.august.jetcaster.ui.player.PlayerDynamicTheme
 import com.august.jetcaster.ui.player.PlayerImage
 import com.august.jetcaster.util.verticalGradientScrim
@@ -84,58 +69,14 @@ fun PlayerBar(
                     .basicMarquee()
             )
 
-            Row {
-                val buttonsModifier = Modifier
-                    .size(24.dp)
-                    .semantics { role = Role.Button }
-
-                IconButton(
-                    onClick = { onMediaEvent(MediaEvent.SeekBack) }
-                ) {
-                    Image(
-                        imageVector = Icons.Filled.Replay10,
-                        contentDescription = stringResource(R.string.cd_reply10),
-                        contentScale = ContentScale.Fit,
-                        colorFilter = ColorFilter.tint(LocalContentColor.current),
-                        modifier = buttonsModifier
-                    )
-                }
-
-                val playPauseIcon = if (uiState.isBuffering) {
-                    Icons.Rounded.Downloading
-                } else if (uiState.isPlaying) {
-                    Icons.Rounded.PauseCircleFilled
-                } else {
-                    Icons.Rounded.PlayCircleFilled
-                }
-                IconButton(
-                    onClick = {
-                        if (!uiState.isBuffering) onMediaEvent(MediaEvent.PlayPause)
-                    }
-                ) {
-                    Image(
-                        imageVector = playPauseIcon,
-                        contentDescription = stringResource(R.string.cd_play),
-                        contentScale = ContentScale.Fit,
-                        colorFilter = ColorFilter.tint(LocalContentColor.current),
-                        modifier = Modifier
-                            .size(36.dp)
-                            .semantics { role = Role.Button }
-                    )
-                }
-
-                IconButton(
-                    onClick = { onMediaEvent(MediaEvent.SeekForward) }
-                ) {
-                    Image(
-                        imageVector = Icons.Filled.Forward30,
-                        contentDescription = stringResource(R.string.cd_forward30),
-                        contentScale = ContentScale.Fit,
-                        colorFilter = ColorFilter.tint(LocalContentColor.current),
-                        modifier = buttonsModifier
-                    )
-                }
-            }
+            PlayerButtons(
+                isBuffering = uiState.isBuffering,
+                isPlaying = uiState.isPlaying,
+                sideButtonSize = 24.dp,
+                playerButtonSize = 36.dp,
+                showSkipButtons = false,
+                onMediaEvent = onMediaEvent
+            )
         }
     }
 }

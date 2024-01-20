@@ -58,7 +58,6 @@ import androidx.compose.material.icons.filled.Forward30
 import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material.icons.filled.SkipPrevious
-import androidx.compose.material.icons.rounded.Downloading
 import androidx.compose.material.icons.rounded.PauseCircleFilled
 import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -240,6 +239,103 @@ fun PlayerImage(
     )
 }
 
+@Composable
+fun PlayerButtons(
+    modifier: Modifier = Modifier,
+    playerButtonSize: Dp = 72.dp,
+    sideButtonSize: Dp = 48.dp,
+    showSkipButtons: Boolean = true,
+    isBuffering: Boolean,
+    isPlaying: Boolean,
+    onMediaEvent: (MediaEvent) -> Unit
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        val buttonsModifier = Modifier
+            .size(sideButtonSize)
+            .semantics { role = Role.Button }
+
+        if (showSkipButtons) {
+            IconButton(
+                onClick = { onMediaEvent(MediaEvent.SkipPrev) }
+            ) {
+                Image(
+                    imageVector = Icons.Filled.SkipPrevious,
+                    contentDescription = stringResource(R.string.cd_skip_previous),
+                    contentScale = ContentScale.Fit,
+                    colorFilter = ColorFilter.tint(LocalContentColor.current),
+                    modifier = buttonsModifier
+                )
+            }
+        }
+
+        IconButton(
+            onClick = { onMediaEvent(MediaEvent.SeekBack) }
+        ) {
+            Image(
+                imageVector = Icons.Filled.Replay10,
+                contentDescription = stringResource(R.string.cd_reply10),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                modifier = buttonsModifier
+            )
+        }
+
+        if (isBuffering) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(playerButtonSize),
+                color = MaterialTheme.colors.primaryVariant
+            )
+        } else {
+            val playPauseIcon =
+                if (isPlaying) Icons.Rounded.PauseCircleFilled else Icons.Rounded.PlayCircleFilled
+
+            IconButton(
+                onClick = { onMediaEvent(MediaEvent.PlayPause) }
+            ) {
+                Image(
+                    imageVector = playPauseIcon,
+                    contentDescription = stringResource(R.string.cd_play),
+                    contentScale = ContentScale.Fit,
+                    colorFilter = ColorFilter.tint(LocalContentColor.current),
+                    modifier = Modifier
+                        .size(playerButtonSize)
+                        .semantics { role = Role.Button }
+                )
+            }
+        }
+
+        IconButton(
+            onClick = { onMediaEvent(MediaEvent.SeekForward) }
+        ) {
+            Image(
+                imageVector = Icons.Filled.Forward30,
+                contentDescription = stringResource(R.string.cd_forward30),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                modifier = buttonsModifier
+            )
+        }
+
+        if (showSkipButtons) {
+            IconButton(
+                onClick = { onMediaEvent(MediaEvent.SkipNext) }
+            ) {
+                Image(
+                    imageVector = Icons.Filled.SkipNext,
+                    contentDescription = stringResource(R.string.cd_skip_next),
+                    contentScale = ContentScale.Fit,
+                    colorFilter = ColorFilter.tint(LocalContentColor.current),
+                    modifier = buttonsModifier
+                )
+            }
+        }
+    }
+}
+
 /**
  * The UI for the top pane of a tabletop layout.
  */
@@ -280,7 +376,9 @@ private fun PlayerContentRegular(
             ) {
                 PlayerSlider(uiState.position, uiState.duration, onMediaEvent)
                 PlayerButtons(
-                    Modifier.padding(vertical = 8.dp),
+                    Modifier
+                        .padding(vertical = 8.dp)
+                        .fillMaxWidth(),
                     isBuffering = uiState.isBuffering,
                     isPlaying = uiState.isPlaying,
                     onMediaEvent = onMediaEvent
@@ -354,7 +452,9 @@ private fun PlayerContentTableTopBottom(
         ) {
             PlayerButtons(
                 playerButtonSize = 92.dp,
-                modifier = Modifier.padding(top = 8.dp),
+                modifier = Modifier
+                    .padding(top = 8.dp)
+                    .fillMaxWidth(),
                 isBuffering = uiState.isBuffering,
                 isPlaying = uiState.isPlaying,
                 onMediaEvent = onMediaEvent
@@ -417,7 +517,9 @@ private fun PlayerContentBookEnd(
         )
         PlayerSlider(uiState.position, uiState.duration, onMediaEvent)
         PlayerButtons(
-            Modifier.padding(vertical = 8.dp),
+            Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth(),
             isBuffering = uiState.isBuffering,
             isPlaying = uiState.isPlaying,
             onMediaEvent = onMediaEvent
@@ -520,95 +622,6 @@ private fun PlayerSlider(
             Text(formatDuration(position))
             Spacer(modifier = Modifier.weight(1f))
             Text(formatDuration(duration))
-        }
-    }
-}
-
-@Composable
-private fun PlayerButtons(
-    modifier: Modifier = Modifier,
-    playerButtonSize: Dp = 72.dp,
-    sideButtonSize: Dp = 48.dp,
-    isBuffering: Boolean,
-    isPlaying: Boolean,
-    onMediaEvent: (MediaEvent) -> Unit
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        val buttonsModifier = Modifier
-            .size(sideButtonSize)
-            .semantics { role = Role.Button }
-
-        IconButton(
-            onClick = { onMediaEvent(MediaEvent.SkipPrev) }
-        ) {
-            Image(
-                imageVector = Icons.Filled.SkipPrevious,
-                contentDescription = stringResource(R.string.cd_skip_previous),
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(LocalContentColor.current),
-                modifier = buttonsModifier
-            )
-        }
-
-        IconButton(
-            onClick = { onMediaEvent(MediaEvent.SeekBack) }
-        ) {
-            Image(
-                imageVector = Icons.Filled.Replay10,
-                contentDescription = stringResource(R.string.cd_reply10),
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(LocalContentColor.current),
-                modifier = buttonsModifier
-            )
-        }
-
-        val playPauseIcon = if (isBuffering) {
-            Icons.Rounded.Downloading
-        } else if (isPlaying) {
-            Icons.Rounded.PauseCircleFilled
-        } else {
-            Icons.Rounded.PlayCircleFilled
-        }
-        IconButton(
-            onClick = { if (!isBuffering) onMediaEvent(MediaEvent.PlayPause) }
-        ) {
-            Image(
-                imageVector = playPauseIcon,
-                contentDescription = stringResource(R.string.cd_play),
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(LocalContentColor.current),
-                modifier = Modifier
-                    .size(playerButtonSize)
-                    .semantics { role = Role.Button }
-            )
-        }
-
-        IconButton(
-            onClick = { onMediaEvent(MediaEvent.SeekForward) }
-        ) {
-            Image(
-                imageVector = Icons.Filled.Forward30,
-                contentDescription = stringResource(R.string.cd_forward30),
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(LocalContentColor.current),
-                modifier = buttonsModifier
-            )
-        }
-
-        IconButton(
-            onClick = { onMediaEvent(MediaEvent.SkipNext) }
-        ) {
-            Image(
-                imageVector = Icons.Filled.SkipNext,
-                contentDescription = stringResource(R.string.cd_skip_next),
-                contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(LocalContentColor.current),
-                modifier = buttonsModifier
-            )
         }
     }
 }
