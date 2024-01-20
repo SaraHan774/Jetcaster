@@ -50,6 +50,17 @@ class HomeViewModel @Inject constructor(
     val state: StateFlow<HomeViewState>
         get() = _state
 
+    val playerBarState = MutableStateFlow(
+        PlayerBarUiState(
+            uri = "940aff77-a01a-4bbd-915a-514dd3745126",
+            title = "The Maine Potato War of 1976 And Some Random Text to Make it Longer",
+            podcastImageUrl = "https://media.npr.org/assets/img/2022/10/24/pm_new_tile_2022_sq-b4af5aab11c84cfae38eafa1db74a6da943d4e7f.jpg?s=1400&c=66&f=jpg",
+            isPlaying = false,
+            isBuffering = false,
+            isLoading = false
+        )
+    )
+
     init {
         viewModelScope.launch {
             // Combines the latest value from each of the flows, allowing us to generate a
@@ -111,4 +122,13 @@ data class HomeViewState(
     val selectedHomeCategory: HomeCategory = HomeCategory.Discover,
     val homeCategories: List<HomeCategory> = emptyList(),
     val errorMessage: String? = null
+)
+
+data class PlayerBarUiState(
+    val uri: String,
+    val title: String,
+    val podcastImageUrl: String,
+    val isPlaying: Boolean,
+    val isBuffering: Boolean,
+    val isLoading: Boolean,
 )

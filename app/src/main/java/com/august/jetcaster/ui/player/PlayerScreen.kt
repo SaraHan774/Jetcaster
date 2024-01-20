@@ -221,6 +221,25 @@ fun PlayerContent(
     }
 }
 
+@Composable
+fun PlayerImage(
+    podcastImageUrl: String,
+    modifier: Modifier = Modifier
+) {
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(podcastImageUrl)
+            .crossfade(true)
+            .build(),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = modifier
+            .sizeIn(maxWidth = 500.dp, maxHeight = 500.dp)
+            .aspectRatio(1f)
+            .clip(MaterialTheme.shapes.medium)
+    )
+}
+
 /**
  * The UI for the top pane of a tabletop layout.
  */
@@ -425,25 +444,6 @@ private fun TopAppBar(onBackPress: () -> Unit) {
     }
 }
 
-@Composable
-private fun PlayerImage(
-    podcastImageUrl: String,
-    modifier: Modifier = Modifier
-) {
-    AsyncImage(
-        model = ImageRequest.Builder(LocalContext.current)
-            .data(podcastImageUrl)
-            .crossfade(true)
-            .build(),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = modifier
-            .sizeIn(maxWidth = 500.dp, maxHeight = 500.dp)
-            .aspectRatio(1f)
-            .clip(MaterialTheme.shapes.medium)
-    )
-}
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun PodcastDescription(
@@ -617,7 +617,7 @@ private fun PlayerButtons(
  * Theme that updates the colors dynamically depending on the podcast image URL
  */
 @Composable
-private fun PlayerDynamicTheme(
+fun PlayerDynamicTheme(
     podcastImageUrl: String,
     content: @Composable () -> Unit
 ) {

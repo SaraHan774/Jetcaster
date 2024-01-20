@@ -19,6 +19,7 @@ package com.august.jetcaster.ui.home
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -54,6 +55,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -61,10 +63,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.august.jetcaster.R
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.ui.home.discover.Discover
+import com.august.jetcaster.ui.home.playerbar.PlayerBar
 import com.august.jetcaster.ui.theme.MinContrastOfPrimaryVsSurface
 import com.august.jetcaster.util.DynamicThemePrimaryColorsFromImage
 import com.august.jetcaster.util.contrastAgainst
@@ -78,16 +80,26 @@ fun Home(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val viewState by viewModel.state.collectAsStateWithLifecycle()
+    val playerBarUiState by viewModel.playerBarState.collectAsStateWithLifecycle()
+
     Surface(Modifier.fillMaxSize()) {
-        HomeContent(
-            featuredPodcasts = viewState.featuredPodcasts,
-            isRefreshing = viewState.refreshing,
-            homeCategories = viewState.homeCategories,
-            selectedHomeCategory = viewState.selectedHomeCategory,
-            onCategorySelected = viewModel::onHomeCategorySelected,
-            navigateToPlayer = navigateToPlayer,
-            modifier = Modifier.fillMaxSize()
-        )
+        Box {
+            HomeContent(
+                featuredPodcasts = viewState.featuredPodcasts,
+                isRefreshing = viewState.refreshing,
+                homeCategories = viewState.homeCategories,
+                selectedHomeCategory = viewState.selectedHomeCategory,
+                onCategorySelected = viewModel::onHomeCategorySelected,
+                navigateToPlayer = navigateToPlayer,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            PlayerBar(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                uiState = playerBarUiState,
+                onMediaEvent = {}
+            )
+        }
     }
 }
 
