@@ -16,7 +16,6 @@
 
 package com.august.jetcaster.ui.home.category
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -74,7 +73,7 @@ class PodcastCategoryViewModel @AssistedInject constructor(
         fun provideFactory(
             assistedFactory: PodcastCategoryViewModelFactory,
             categoryId: Long
-        ) : ViewModelProvider.Factory {
+        ): ViewModelProvider.Factory {
             return object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     return assistedFactory.create(categoryId) as T

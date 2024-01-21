@@ -22,15 +22,12 @@ import androidx.compose.material.TextButton
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.window.layout.DisplayFeature
 import com.august.jetcaster.R
 import com.august.jetcaster.ui.home.Home
 import com.august.jetcaster.ui.player.PlayerScreen
-import com.august.jetcaster.ui.player.PlayerViewModel
 
 @Composable
 fun JetcasterApp(

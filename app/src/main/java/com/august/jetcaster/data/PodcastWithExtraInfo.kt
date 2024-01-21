@@ -42,9 +42,10 @@ class PodcastWithExtraInfo {
         other === this -> true
         other is PodcastWithExtraInfo -> {
             podcast == other.podcast &&
-                lastEpisodeDate == other.lastEpisodeDate &&
-                isFollowed == other.isFollowed
+                    lastEpisodeDate == other.lastEpisodeDate &&
+                    isFollowed == other.isFollowed
         }
+
         else -> false
     }
 
