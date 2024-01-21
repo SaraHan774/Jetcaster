@@ -88,7 +88,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @Composable
-fun PodcastCategory(
+fun PodcastCategoryAndEpisodes(
     categoryId: Long,
     navigateToPlayer: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -109,7 +109,7 @@ fun PodcastCategory(
     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
-        EpisodeList(
+        CategoryAndEpisodesList(
             viewState.episodes,
             viewState.topPodcasts,
             navigateToPlayer,
@@ -118,20 +118,11 @@ fun PodcastCategory(
     }
 }
 
+/**
+ * List of categories and its corresponding episodes
+ */
 @Composable
-private fun CategoryPodcasts(
-    topPodcasts: List<PodcastWithExtraInfo>,
-    onTogglePodcastFollowed: (String) -> Unit,
-) {
-    CategoryPodcastRow(
-        podcasts = topPodcasts,
-        onTogglePodcastFollowed = onTogglePodcastFollowed,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-private fun EpisodeList(
+private fun CategoryAndEpisodesList(
     episodes: List<EpisodeToPodcast>,
     topPodcasts: List<PodcastWithExtraInfo>,
     navigateToPlayer: (String) -> Unit,
@@ -154,6 +145,18 @@ private fun EpisodeList(
             )
         }
     }
+}
+
+@Composable
+private fun CategoryPodcasts(
+    topPodcasts: List<PodcastWithExtraInfo>,
+    onTogglePodcastFollowed: (String) -> Unit,
+) {
+    CategoryPodcastRow(
+        podcasts = topPodcasts,
+        onTogglePodcastFollowed = onTogglePodcastFollowed,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Composable
