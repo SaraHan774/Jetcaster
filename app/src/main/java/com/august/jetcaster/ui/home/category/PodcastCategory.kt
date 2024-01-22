@@ -88,7 +88,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 @Composable
-fun PodcastCategory(
+fun PodcastCategoryAndEpisodes(
     categoryId: Long,
     navigateToPlayer: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -108,36 +108,33 @@ fun PodcastCategory(
     )
     val viewState by viewModel.state.collectAsStateWithLifecycle()
 
-    /**
-     * TODO: reset scroll position when category changes
-     */
     Column(modifier = modifier) {
-        CategoryPodcasts(viewState.topPodcasts, viewModel)
-        EpisodeList(viewState.episodes, navigateToPlayer)
+        CategoryAndEpisodesList(
+            viewState.episodes,
+            viewState.topPodcasts,
+            navigateToPlayer,
+            viewModel::onTogglePodcastFollowed,
+        )
     }
 }
 
+/**
+ * List of categories and its corresponding episodes
+ */
 @Composable
-private fun CategoryPodcasts(
-    topPodcasts: List<PodcastWithExtraInfo>,
-    viewModel: PodcastCategoryViewModel
-) {
-    CategoryPodcastRow(
-        podcasts = topPodcasts,
-        onTogglePodcastFollowed = viewModel::onTogglePodcastFollowed,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-private fun EpisodeList(
+private fun CategoryAndEpisodesList(
     episodes: List<EpisodeToPodcast>,
-    navigateToPlayer: (String) -> Unit
+    topPodcasts: List<PodcastWithExtraInfo>,
+    navigateToPlayer: (String) -> Unit,
+    onTogglePodcastFollowed: (String) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
         verticalArrangement = Arrangement.Center
     ) {
+        item {
+            CategoryPodcasts(topPodcasts, onTogglePodcastFollowed)
+        }
 
         items(episodes, key = { it.episode.uri }) { item ->
             EpisodeListItem(
@@ -148,6 +145,18 @@ private fun EpisodeList(
             )
         }
     }
+}
+
+@Composable
+private fun CategoryPodcasts(
+    topPodcasts: List<PodcastWithExtraInfo>,
+    onTogglePodcastFollowed: (String) -> Unit,
+) {
+    CategoryPodcastRow(
+        podcasts = topPodcasts,
+        onTogglePodcastFollowed = onTogglePodcastFollowed,
+        modifier = Modifier.fillMaxWidth()
+    )
 }
 
 @Composable

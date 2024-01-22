@@ -36,7 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.august.jetcaster.data.Category
-import com.august.jetcaster.ui.home.category.PodcastCategory
+import com.august.jetcaster.ui.home.category.PodcastCategoryAndEpisodes
 import com.august.jetcaster.ui.theme.Keyline1
 
 @Composable
@@ -71,7 +71,7 @@ fun Discover(
                 /**
                  * TODO, need to think about how this will scroll within the outer VerticalScroller
                  */
-                PodcastCategory(
+                PodcastCategoryAndEpisodes(
                     categoryId = category.id,
                     navigateToPlayer = navigateToPlayer,
                     modifier = Modifier.fillMaxSize()
