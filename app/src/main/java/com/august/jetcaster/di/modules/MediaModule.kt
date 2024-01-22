@@ -11,9 +11,6 @@ import com.august.jetcaster.media.NotificationManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.components.ActivityComponent
-import dagger.hilt.android.components.ServiceComponent
-import dagger.hilt.android.qualifiers.ActivityContext
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
@@ -50,7 +47,7 @@ object MediaModule {
     fun provideNotificationManager(
         @ApplicationContext context: Context,
         player: ExoPlayer
-    ) : NotificationManager = NotificationManager(context, player)
+    ): NotificationManager = NotificationManager(context, player)
 
     @UnstableApi
     @Singleton

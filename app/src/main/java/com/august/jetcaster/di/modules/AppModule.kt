@@ -55,11 +55,13 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun provideCategoryEntryDao(db: JetcasterDatabase): PodcastCategoryEntryDao = db.podcastCategoryEntryDao()
+    fun provideCategoryEntryDao(db: JetcasterDatabase): PodcastCategoryEntryDao =
+        db.podcastCategoryEntryDao()
 
     @Singleton
     @Provides
-    fun provideTransactionRunner(db: JetcasterDatabase): TransactionRunner = db.transactionRunnerDao()
+    fun provideTransactionRunner(db: JetcasterDatabase): TransactionRunner =
+        db.transactionRunnerDao()
 
     @Singleton
     @Provides
@@ -67,7 +69,7 @@ object AppModule {
         return OkHttpClient.Builder()
             .cache(Cache(File(context.cacheDir, "http_cache"), (20 * 1024 * 1024).toLong()))
             .apply {
-                 if (BuildConfig.DEBUG) eventListenerFactory(LoggingEventListener.Factory())
+                if (BuildConfig.DEBUG) eventListenerFactory(LoggingEventListener.Factory())
             }
             .build()
     }
