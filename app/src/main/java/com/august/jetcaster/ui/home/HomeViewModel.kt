@@ -46,7 +46,7 @@ class HomeViewModel @Inject constructor(
     private val selectedCategory = MutableStateFlow(HomeCategory.Discover)
 
     // Holds the currently available home categories
-    private val categories = MutableStateFlow(HomeCategory.values().asList())
+    private val categories = MutableStateFlow(HomeCategory.entries)
 
     // Holds our view state which the UI collects via [state]
     private val _state = MutableStateFlow(HomeViewState())
