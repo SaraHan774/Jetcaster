@@ -3,8 +3,11 @@ package com.august.jetcaster.ui.home.playerbar
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.MaterialTheme
@@ -34,6 +37,11 @@ fun PlayerBar(
     ) {
         Row(
             modifier = modifier
+                .padding(
+                    bottom = WindowInsets.navigationBars
+                        .asPaddingValues()
+                        .calculateBottomPadding()
+                )
                 .height(76.dp)
                 .fillMaxWidth()
                 .verticalGradientScrim(
@@ -45,8 +53,7 @@ fun PlayerBar(
                 .padding(
                     start = 8.dp,
                     end = 8.dp,
-                    top = 8.dp,
-                    bottom = 12.dp
+                    top = 8.dp
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -63,6 +70,7 @@ fun PlayerBar(
                     fontWeight = FontWeight.Bold
                 ),
                 maxLines = 1,
+                color = MaterialTheme.colors.onPrimary,
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp)
@@ -75,6 +83,7 @@ fun PlayerBar(
                 sideButtonSize = 24.dp,
                 playerButtonSize = 36.dp,
                 showSkipButtons = false,
+                buttonTint = MaterialTheme.colors.onPrimary,
                 onMediaEvent = onMediaEvent
             )
         }

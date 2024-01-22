@@ -69,6 +69,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -245,6 +246,7 @@ fun PlayerButtons(
     playerButtonSize: Dp = 72.dp,
     sideButtonSize: Dp = 48.dp,
     showSkipButtons: Boolean = true,
+    buttonTint: Color = LocalContentColor.current,
     isBuffering: Boolean,
     isPlaying: Boolean,
     onMediaEvent: (MediaEvent) -> Unit
@@ -266,7 +268,7 @@ fun PlayerButtons(
                     imageVector = Icons.Filled.SkipPrevious,
                     contentDescription = stringResource(R.string.cd_skip_previous),
                     contentScale = ContentScale.Fit,
-                    colorFilter = ColorFilter.tint(LocalContentColor.current),
+                    colorFilter = ColorFilter.tint(buttonTint),
                     modifier = buttonsModifier
                 )
             }
@@ -279,7 +281,7 @@ fun PlayerButtons(
                 imageVector = Icons.Filled.Replay10,
                 contentDescription = stringResource(R.string.cd_reply10),
                 contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                colorFilter = ColorFilter.tint(buttonTint),
                 modifier = buttonsModifier
             )
         }
@@ -300,7 +302,7 @@ fun PlayerButtons(
                     imageVector = playPauseIcon,
                     contentDescription = stringResource(R.string.cd_play),
                     contentScale = ContentScale.Fit,
-                    colorFilter = ColorFilter.tint(LocalContentColor.current),
+                    colorFilter = ColorFilter.tint(buttonTint),
                     modifier = Modifier
                         .size(playerButtonSize)
                         .semantics { role = Role.Button }
@@ -315,7 +317,7 @@ fun PlayerButtons(
                 imageVector = Icons.Filled.Forward30,
                 contentDescription = stringResource(R.string.cd_forward30),
                 contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                colorFilter = ColorFilter.tint(buttonTint),
                 modifier = buttonsModifier
             )
         }
@@ -328,7 +330,7 @@ fun PlayerButtons(
                     imageVector = Icons.Filled.SkipNext,
                     contentDescription = stringResource(R.string.cd_skip_next),
                     contentScale = ContentScale.Fit,
-                    colorFilter = ColorFilter.tint(LocalContentColor.current),
+                    colorFilter = ColorFilter.tint(buttonTint),
                     modifier = buttonsModifier
                 )
             }
