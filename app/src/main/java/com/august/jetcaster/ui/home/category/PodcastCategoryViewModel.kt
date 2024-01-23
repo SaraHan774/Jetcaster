@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.august.jetcaster.data.CategoryStore
+import com.august.jetcaster.data.Episode
 import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
@@ -28,6 +29,7 @@ import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PodcastCategoryViewModel @AssistedInject constructor(
@@ -68,6 +70,17 @@ class PodcastCategoryViewModel @AssistedInject constructor(
         }
     }
 
+    fun setSelectedEpisode(episode: Episode, isPlaying: Boolean) {
+        _state.update {
+            it.copy(
+                selectedEpisode = SelectedEpisodeItemState(
+                    episode = episode,
+                    isPlaying = isPlaying,
+                )
+            )
+        }
+    }
+
     companion object {
         @Suppress("UNCHECKED_CAST")
         fun provideFactory(
@@ -85,5 +98,11 @@ class PodcastCategoryViewModel @AssistedInject constructor(
 
 data class PodcastCategoryViewState(
     val topPodcasts: List<PodcastWithExtraInfo> = emptyList(),
-    val episodes: List<EpisodeToPodcast> = emptyList()
+    val episodes: List<EpisodeToPodcast> = emptyList(),
+    val selectedEpisode: SelectedEpisodeItemState? = null,
+)
+
+data class SelectedEpisodeItemState(
+    val episode: Episode? = null,
+    val isPlaying: Boolean = false,
 )

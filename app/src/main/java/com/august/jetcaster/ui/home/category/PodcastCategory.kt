@@ -16,6 +16,7 @@
 
 package com.august.jetcaster.ui.home.category
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -45,6 +46,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlaylistAdd
+import androidx.compose.material.icons.rounded.PauseCircleFilled
 import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
@@ -77,8 +79,12 @@ import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.Podcast
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.di.modules.ViewModelFactoryProvider
+import com.august.jetcaster.media.MediaBus
+import com.august.jetcaster.media.MediaEvent
+import com.august.jetcaster.media.MediaState
 import com.august.jetcaster.ui.home.PreviewEpisodes
 import com.august.jetcaster.ui.home.PreviewPodcasts
+import com.august.jetcaster.ui.player.PlayerUiState
 import com.august.jetcaster.ui.theme.JetcasterTheme
 import com.august.jetcaster.ui.theme.Keyline1
 import com.august.jetcaster.util.ToggleFollowPodcastIconButton
@@ -89,9 +95,9 @@ import java.time.format.FormatStyle
 
 @Composable
 fun PodcastCategoryAndEpisodes(
+    modifier: Modifier = Modifier,
     categoryId: Long,
     navigateToPlayer: (String) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val factory = EntryPointAccessors.fromActivity(
         LocalContext.current.findActivity(),
@@ -102,18 +108,20 @@ fun PodcastCategoryAndEpisodes(
      * CategoryEpisodeListViewModel requires the category as part of it's constructor, therefore
      * we need to assist with it's instantiation with a custom factory and custom key.
      */
-    val viewModel: PodcastCategoryViewModel = viewModel(
+    val podcastCategoryViewModel: PodcastCategoryViewModel = viewModel(
         key = "category_list_$categoryId",
         factory = PodcastCategoryViewModel.provideFactory(factory, categoryId)
     )
-    val viewState by viewModel.state.collectAsStateWithLifecycle()
+    val viewState by podcastCategoryViewModel.state.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
         CategoryAndEpisodesList(
             viewState.episodes,
             viewState.topPodcasts,
+            viewState.selectedEpisode,
             navigateToPlayer,
-            viewModel::onTogglePodcastFollowed,
+            podcastCategoryViewModel::onTogglePodcastFollowed,
+            podcastCategoryViewModel::setSelectedEpisode
         )
     }
 }
@@ -125,8 +133,10 @@ fun PodcastCategoryAndEpisodes(
 private fun CategoryAndEpisodesList(
     episodes: List<EpisodeToPodcast>,
     topPodcasts: List<PodcastWithExtraInfo>,
+    selectedEpisode: SelectedEpisodeItemState?,
     navigateToPlayer: (String) -> Unit,
     onTogglePodcastFollowed: (String) -> Unit,
+    setSelectedEpisode: (Episode, Boolean) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
@@ -140,7 +150,9 @@ private fun CategoryAndEpisodesList(
             EpisodeListItem(
                 episode = item.episode,
                 podcast = item.podcast,
+                isPlaying = (selectedEpisode?.episode?.uri == item.episode.uri) && selectedEpisode.isPlaying,
                 onClick = navigateToPlayer,
+                onClickPlayPause = { setSelectedEpisode(item.episode, selectedEpisode?.isPlaying?.not() ?: true) },
                 modifier = Modifier.fillParentMaxWidth()
             )
         }
@@ -163,7 +175,9 @@ private fun CategoryPodcasts(
 fun EpisodeListItem(
     episode: Episode,
     podcast: Podcast,
+    isPlaying: Boolean,
     onClick: (String) -> Unit,
+    onClickPlayPause: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(modifier = modifier.clickable { onClick(episode.uri) }) {
@@ -240,8 +254,13 @@ fun EpisodeListItem(
             )
         }
 
+        val icon = if (isPlaying) {
+            Icons.Rounded.PauseCircleFilled
+        } else {
+            Icons.Rounded.PlayCircleFilled
+        }
         Image(
-            imageVector = Icons.Rounded.PlayCircleFilled,
+            imageVector = icon,
             contentDescription = stringResource(R.string.cd_play),
             contentScale = ContentScale.Fit,
             colorFilter = ColorFilter.tint(LocalContentColor.current),
@@ -249,7 +268,11 @@ fun EpisodeListItem(
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(bounded = false, radius = 24.dp)
-                ) { /* TODO */ }
+                ) {
+                    MediaEvent.SetItem(episode.uri)
+                    MediaBus.sendEvent(MediaEvent.PlayPause)
+                    onClickPlayPause()
+                }
                 .size(48.dp)
                 .padding(6.dp)
                 .semantics { role = Role.Button }
@@ -407,7 +430,9 @@ fun PreviewEpisodeListItem() {
         EpisodeListItem(
             episode = PreviewEpisodes[0],
             podcast = PreviewPodcasts[0],
+            isPlaying = false,
             onClick = { },
+            onClickPlayPause = { },
             modifier = Modifier.fillMaxWidth()
         )
     }
