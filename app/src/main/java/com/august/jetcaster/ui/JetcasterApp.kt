@@ -42,8 +42,8 @@ fun JetcasterApp(
         ) {
             composable(Screen.Home.route) { backStackEntry ->
                 Home(
-                    navigateToPlayer = { episodeUri ->
-                        appState.navigateToPlayer(episodeUri, backStackEntry)
+                    navigateToPlayer = {
+                        appState.navigateToPlayer(backStackEntry)
                     }
                 )
             }

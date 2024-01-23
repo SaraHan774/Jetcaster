@@ -21,14 +21,19 @@ import androidx.lifecycle.viewModelScope
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.data.PodcastsRepository
+import com.august.jetcaster.media.MediaBus
+import com.august.jetcaster.media.MediaEvent
+import com.august.jetcaster.media.PlayerState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.collections.immutable.PersistentList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,6 +55,9 @@ class HomeViewModel @Inject constructor(
 
     val state: StateFlow<HomeViewState>
         get() = _state
+
+    private val _playerBarUiState = MutableStateFlow(PlayerBarUiState.IDLE)
+    val playerBarState = _playerBarUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -76,6 +84,8 @@ class HomeViewModel @Inject constructor(
             }
         }
 
+        collectMediaState()
+
         refresh(force = false)
     }
 
@@ -100,6 +110,26 @@ class HomeViewModel @Inject constructor(
             podcastStore.unfollowPodcast(podcastUri)
         }
     }
+
+    fun onMediaEvent(event: MediaEvent) {
+        MediaBus.sendEvent(event)
+    }
+
+    private fun collectMediaState() {
+        viewModelScope.launch {
+            MediaBus.state.collect { mediaState ->
+                _playerBarUiState.update {
+                    it.copy(
+                        title = mediaState.mediaItem.displayTitle.toString(),
+                        podcastImageUrl = mediaState.mediaItem.artworkUri?.toString() ?: "",
+                        isPlaying = mediaState.isPlaying,
+                        isBuffering = mediaState.playerState == PlayerState.BUFFERING,
+                        isIdle = mediaState.playerState == PlayerState.IDLE
+                    )
+                }
+            }
+        }
+    }
 }
 
 enum class HomeCategory {
@@ -113,3 +143,21 @@ data class HomeViewState(
     val homeCategories: List<HomeCategory> = emptyList(),
     val errorMessage: String? = null
 )
+
+data class PlayerBarUiState(
+    val title: String,
+    val podcastImageUrl: String,
+    val isPlaying: Boolean,
+    val isBuffering: Boolean,
+    val isIdle: Boolean,
+) {
+    companion object {
+        val IDLE = PlayerBarUiState(
+            title = "",
+            podcastImageUrl = "",
+            isPlaying = false,
+            isBuffering = false,
+            isIdle = true
+        )
+    }
+}
