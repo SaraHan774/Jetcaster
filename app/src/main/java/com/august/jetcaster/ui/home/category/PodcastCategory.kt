@@ -16,7 +16,6 @@
 
 package com.august.jetcaster.ui.home.category
 
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -79,12 +78,8 @@ import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.Podcast
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.di.modules.ViewModelFactoryProvider
-import com.august.jetcaster.media.MediaBus
-import com.august.jetcaster.media.MediaEvent
-import com.august.jetcaster.media.MediaState
 import com.august.jetcaster.ui.home.PreviewEpisodes
 import com.august.jetcaster.ui.home.PreviewPodcasts
-import com.august.jetcaster.ui.player.PlayerUiState
 import com.august.jetcaster.ui.theme.JetcasterTheme
 import com.august.jetcaster.ui.theme.Keyline1
 import com.august.jetcaster.util.ToggleFollowPodcastIconButton
@@ -115,6 +110,7 @@ fun PodcastCategoryAndEpisodes(
     val viewState by podcastCategoryViewModel.state.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
+        // FIXME: 아래와 같이 selectedEpisode 를 넘겨주고 setSelectedEpisode 하는게 과연 맞는건지 ?
         CategoryAndEpisodesList(
             viewState.episodes,
             viewState.topPodcasts,
@@ -133,7 +129,7 @@ fun PodcastCategoryAndEpisodes(
 private fun CategoryAndEpisodesList(
     episodes: List<EpisodeToPodcast>,
     topPodcasts: List<PodcastWithExtraInfo>,
-    selectedEpisode: SelectedEpisodeItemState?,
+    selectedEpisode: SelectedEpisode?,
     navigateToPlayer: (String) -> Unit,
     onTogglePodcastFollowed: (String) -> Unit,
     setSelectedEpisode: (Episode, Boolean) -> Unit,
@@ -150,6 +146,7 @@ private fun CategoryAndEpisodesList(
             EpisodeListItem(
                 episode = item.episode,
                 podcast = item.podcast,
+                // FIXME : 이런 것들 정리가 필요해 보이는데, 과연 조건식이 유효한 것일지도 조금 더 생각을 해봐야.
                 isPlaying = (selectedEpisode?.episode?.uri == item.episode.uri) && selectedEpisode.isPlaying,
                 onClick = navigateToPlayer,
                 onClickPlayPause = { setSelectedEpisode(item.episode, selectedEpisode?.isPlaying?.not() ?: true) },
@@ -269,8 +266,6 @@ fun EpisodeListItem(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(bounded = false, radius = 24.dp)
                 ) {
-                    MediaEvent.SetItem(episode.uri)
-                    MediaBus.sendEvent(MediaEvent.PlayPause)
                     onClickPlayPause()
                 }
                 .size(48.dp)

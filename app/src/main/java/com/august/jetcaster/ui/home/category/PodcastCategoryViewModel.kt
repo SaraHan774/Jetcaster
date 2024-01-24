@@ -24,6 +24,8 @@ import com.august.jetcaster.data.Episode
 import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
+import com.august.jetcaster.media.MediaBus
+import com.august.jetcaster.media.MediaEvent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -62,6 +64,25 @@ class PodcastCategoryViewModel @AssistedInject constructor(
                 )
             }.collect { _state.value = it }
         }
+
+        viewModelScope.launch {
+            MediaBus.state.collect {
+                if (it.isPlaying) {
+                    _state.update { state ->
+                        state.copy(
+                            selectedEpisode = state.episodes.find { episode ->
+                                episode.episode.title == it.mediaItem.title
+                            }?.let { episode ->
+                                SelectedEpisode(
+                                    episode = episode.episode,
+                                    isPlaying = true
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 
     fun onTogglePodcastFollowed(podcastUri: String) {
@@ -70,15 +91,22 @@ class PodcastCategoryViewModel @AssistedInject constructor(
         }
     }
 
+
     fun setSelectedEpisode(episode: Episode, isPlaying: Boolean) {
         _state.update {
             it.copy(
-                selectedEpisode = SelectedEpisodeItemState(
+                selectedEpisode = SelectedEpisode(
                     episode = episode,
                     isPlaying = isPlaying,
                 )
             )
         }
+        onMediaEvent(MediaEvent.SetItem(episode.uri))
+        onMediaEvent(MediaEvent.PlayPause)
+    }
+
+    private fun onMediaEvent(mediaEvent: MediaEvent) {
+        MediaBus.sendEvent(mediaEvent)
     }
 
     companion object {
@@ -99,10 +127,10 @@ class PodcastCategoryViewModel @AssistedInject constructor(
 data class PodcastCategoryViewState(
     val topPodcasts: List<PodcastWithExtraInfo> = emptyList(),
     val episodes: List<EpisodeToPodcast> = emptyList(),
-    val selectedEpisode: SelectedEpisodeItemState? = null,
+    val selectedEpisode: SelectedEpisode? = null,
 )
 
-data class SelectedEpisodeItemState(
+data class SelectedEpisode( // FIXME : 이게 맞나 ? 애초에 response 클래스를 데이터 모델로 사용하는게 좀 이상하다
     val episode: Episode? = null,
     val isPlaying: Boolean = false,
 )
