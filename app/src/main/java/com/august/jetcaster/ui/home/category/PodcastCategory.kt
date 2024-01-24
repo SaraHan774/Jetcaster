@@ -108,16 +108,16 @@ fun PodcastCategoryAndEpisodes(
         factory = PodcastCategoryViewModel.provideFactory(factory, categoryId)
     )
     val viewState by podcastCategoryViewModel.state.collectAsStateWithLifecycle()
+    val selectedEpisodeState by podcastCategoryViewModel.selectedEpisode.collectAsStateWithLifecycle(SelectedEpisode.NONE)
 
     Column(modifier = modifier) {
-        // FIXME: 아래와 같이 selectedEpisode 를 넘겨주고 setSelectedEpisode 하는게 과연 맞는건지 ?
         CategoryAndEpisodesList(
             viewState.episodes,
             viewState.topPodcasts,
-            viewState.selectedEpisode,
+            selectedEpisodeState,
             navigateToPlayer,
             podcastCategoryViewModel::onTogglePodcastFollowed,
-            podcastCategoryViewModel::setSelectedEpisode
+            podcastCategoryViewModel::onPlayEpisode
         )
     }
 }
@@ -129,10 +129,10 @@ fun PodcastCategoryAndEpisodes(
 private fun CategoryAndEpisodesList(
     episodes: List<EpisodeToPodcast>,
     topPodcasts: List<PodcastWithExtraInfo>,
-    selectedEpisode: SelectedEpisode?,
+    selectedEpisode: SelectedEpisode,
     navigateToPlayer: (String) -> Unit,
     onTogglePodcastFollowed: (String) -> Unit,
-    setSelectedEpisode: (Episode, Boolean) -> Unit,
+    onPlayEpisode: (SelectedEpisode) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
@@ -146,10 +146,9 @@ private fun CategoryAndEpisodesList(
             EpisodeListItem(
                 episode = item.episode,
                 podcast = item.podcast,
-                // FIXME : 이런 것들 정리가 필요해 보이는데, 과연 조건식이 유효한 것일지도 조금 더 생각을 해봐야.
-                isPlaying = (selectedEpisode?.episode?.uri == item.episode.uri) && selectedEpisode.isPlaying,
+                isPlaying = selectedEpisode.isPlayingItem(item.episode),
                 onClick = navigateToPlayer,
-                onClickPlayPause = { setSelectedEpisode(item.episode, selectedEpisode?.isPlaying?.not() ?: true) },
+                onPlayEpisode = onPlayEpisode,
                 modifier = Modifier.fillParentMaxWidth()
             )
         }
@@ -174,7 +173,7 @@ fun EpisodeListItem(
     podcast: Podcast,
     isPlaying: Boolean,
     onClick: (String) -> Unit,
-    onClickPlayPause: () -> Unit,
+    onPlayEpisode: (SelectedEpisode) -> Unit,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(modifier = modifier.clickable { onClick(episode.uri) }) {
@@ -266,7 +265,12 @@ fun EpisodeListItem(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = rememberRipple(bounded = false, radius = 24.dp)
                 ) {
-                    onClickPlayPause()
+                    onPlayEpisode(
+                        SelectedEpisode(
+                            episode = episode,
+                            isPlaying = isPlaying.not(),
+                        )
+                    )
                 }
                 .size(48.dp)
                 .padding(6.dp)
@@ -427,7 +431,7 @@ fun PreviewEpisodeListItem() {
             podcast = PreviewPodcasts[0],
             isPlaying = false,
             onClick = { },
-            onClickPlayPause = { },
+            onPlayEpisode = { },
             modifier = Modifier.fillMaxWidth()
         )
     }

@@ -28,10 +28,12 @@ import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class PodcastCategoryViewModel @AssistedInject constructor(
@@ -43,6 +45,13 @@ class PodcastCategoryViewModel @AssistedInject constructor(
 
     val state: StateFlow<PodcastCategoryViewState>
         get() = _state
+
+
+    private val _selectedEpisode = MutableSharedFlow<SelectedEpisode>(
+        replay = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val selectedEpisode = _selectedEpisode
 
 
     init {
@@ -66,43 +75,25 @@ class PodcastCategoryViewModel @AssistedInject constructor(
         }
 
         viewModelScope.launch {
-            MediaBus.state.collect {
-                if (it.isPlaying) {
-                    _state.update { state ->
-                        state.copy(
-                            selectedEpisode = state.episodes.find { episode ->
-                                episode.episode.title == it.mediaItem.title
-                            }?.let { episode ->
-                                SelectedEpisode(
-                                    episode = episode.episode,
-                                    isPlaying = true
-                                )
-                            }
-                        )
-                    }
+            selectedEpisode.map { it.episode }.collect { episode ->
+                // FIXME : 이렇게 비교하는건 불안정해 보이는데 다른 방법 찾아야 한다
+                if (episode?.title != MediaBus.state.value.mediaItem.displayTitle) {
+                    if (episode != null) onMediaEvent(MediaEvent.SetItem(uri = episode.uri))
+                } else {
+                    onMediaEvent(MediaEvent.PlayPause)
                 }
             }
         }
+    }
+
+    fun onPlayEpisode(selectedEpisode: SelectedEpisode) {
+        _selectedEpisode.tryEmit(selectedEpisode)
     }
 
     fun onTogglePodcastFollowed(podcastUri: String) {
         viewModelScope.launch {
             podcastStore.togglePodcastFollowed(podcastUri)
         }
-    }
-
-
-    fun setSelectedEpisode(episode: Episode, isPlaying: Boolean) {
-        _state.update {
-            it.copy(
-                selectedEpisode = SelectedEpisode(
-                    episode = episode,
-                    isPlaying = isPlaying,
-                )
-            )
-        }
-        onMediaEvent(MediaEvent.SetItem(episode.uri))
-        onMediaEvent(MediaEvent.PlayPause)
     }
 
     private fun onMediaEvent(mediaEvent: MediaEvent) {
@@ -127,10 +118,15 @@ class PodcastCategoryViewModel @AssistedInject constructor(
 data class PodcastCategoryViewState(
     val topPodcasts: List<PodcastWithExtraInfo> = emptyList(),
     val episodes: List<EpisodeToPodcast> = emptyList(),
-    val selectedEpisode: SelectedEpisode? = null,
 )
 
-data class SelectedEpisode( // FIXME : 이게 맞나 ? 애초에 response 클래스를 데이터 모델로 사용하는게 좀 이상하다
+data class SelectedEpisode(
     val episode: Episode? = null,
     val isPlaying: Boolean = false,
-)
+) {
+    companion object {
+        val NONE = SelectedEpisode()
+    }
+}
+
+fun SelectedEpisode?.isPlayingItem(item: Episode) = this?.episode?.uri == item.uri && this.isPlaying
