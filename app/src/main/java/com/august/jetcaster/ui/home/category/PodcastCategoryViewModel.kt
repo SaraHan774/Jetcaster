@@ -16,6 +16,8 @@
 
 package com.august.jetcaster.ui.home.category
 
+import android.provider.MediaStore.Audio.Media
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -26,14 +28,18 @@ import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
+import com.august.jetcaster.media.PlayerState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PodcastCategoryViewModel @AssistedInject constructor(
@@ -46,13 +52,8 @@ class PodcastCategoryViewModel @AssistedInject constructor(
     val state: StateFlow<PodcastCategoryViewState>
         get() = _state
 
-
-    private val _selectedEpisode = MutableSharedFlow<SelectedEpisode>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val selectedEpisode = _selectedEpisode
-
+    private val _episodeListItemState = MutableStateFlow(EpisodeListItemState())
+    val episodeListItemState = _episodeListItemState
 
     init {
         viewModelScope.launch {
@@ -75,19 +76,24 @@ class PodcastCategoryViewModel @AssistedInject constructor(
         }
 
         viewModelScope.launch {
-            selectedEpisode.map { it.episode }.collect { episode ->
-                // FIXME : 이렇게 비교하는건 불안정해 보이는데 다른 방법 찾아야 한다
-                if (episode?.title != MediaBus.state.value.mediaItem.displayTitle) {
-                    if (episode != null) onMediaEvent(MediaEvent.SetItem(uri = episode.uri))
-                } else {
-                    onMediaEvent(MediaEvent.PlayPause)
+            MediaBus.state.collect { mediaState ->
+                _episodeListItemState.update {
+                    it.copy(
+                        selectedEpisodeTitle = mediaState.mediaItem.displayTitle.toString(),
+                        isPlaying = mediaState.isPlaying,
+                        isLoading = mediaState.playerState == PlayerState.BUFFERING,
+                    )
                 }
             }
         }
     }
 
-    fun onPlayEpisode(selectedEpisode: SelectedEpisode) {
-        _selectedEpisode.tryEmit(selectedEpisode)
+    fun onPlayEpisode(episode: Episode) {
+        if (episodeListItemState.value.selectedEpisodeTitle != episode.title) {
+            onMediaEvent(MediaEvent.SetItem(episode.uri))
+        } else {
+            onMediaEvent(MediaEvent.PlayPause)
+        }
     }
 
     fun onTogglePodcastFollowed(podcastUri: String) {
@@ -120,13 +126,9 @@ data class PodcastCategoryViewState(
     val episodes: List<EpisodeToPodcast> = emptyList(),
 )
 
-data class SelectedEpisode(
-    val episode: Episode? = null,
+data class EpisodeListItemState(
+    val selectedEpisodeTitle: String = "",
     val isPlaying: Boolean = false,
-) {
-    companion object {
-        val NONE = SelectedEpisode()
-    }
-}
+    val isLoading: Boolean = false,
+)
 
-fun SelectedEpisode?.isPlayingItem(item: Episode) = this?.episode?.uri == item.uri && this.isPlaying

@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -108,13 +109,15 @@ fun PodcastCategoryAndEpisodes(
         factory = PodcastCategoryViewModel.provideFactory(factory, categoryId)
     )
     val viewState by podcastCategoryViewModel.state.collectAsStateWithLifecycle()
-    val selectedEpisodeState by podcastCategoryViewModel.selectedEpisode.collectAsStateWithLifecycle(SelectedEpisode.NONE)
+    val episodeListItemState by podcastCategoryViewModel.episodeListItemState.collectAsStateWithLifecycle(
+        EpisodeListItemState()
+    )
 
     Column(modifier = modifier) {
         CategoryAndEpisodesList(
             viewState.episodes,
             viewState.topPodcasts,
-            selectedEpisodeState,
+            episodeListItemState,
             navigateToPlayer,
             podcastCategoryViewModel::onTogglePodcastFollowed,
             podcastCategoryViewModel::onPlayEpisode
@@ -129,10 +132,10 @@ fun PodcastCategoryAndEpisodes(
 private fun CategoryAndEpisodesList(
     episodes: List<EpisodeToPodcast>,
     topPodcasts: List<PodcastWithExtraInfo>,
-    selectedEpisode: SelectedEpisode,
+    episodeListItemState: EpisodeListItemState,
     navigateToPlayer: (String) -> Unit,
     onTogglePodcastFollowed: (String) -> Unit,
-    onPlayEpisode: (SelectedEpisode) -> Unit,
+    onPlayEpisode: (Episode) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
@@ -146,7 +149,8 @@ private fun CategoryAndEpisodesList(
             EpisodeListItem(
                 episode = item.episode,
                 podcast = item.podcast,
-                isPlaying = selectedEpisode.isPlayingItem(item.episode),
+                isPlaying = item.episode.title == episodeListItemState.selectedEpisodeTitle && episodeListItemState.isPlaying,
+                isLoading = item.episode.title == episodeListItemState.selectedEpisodeTitle && episodeListItemState.isLoading,
                 onClick = navigateToPlayer,
                 onPlayEpisode = onPlayEpisode,
                 modifier = Modifier.fillParentMaxWidth()
@@ -172,8 +176,9 @@ fun EpisodeListItem(
     episode: Episode,
     podcast: Podcast,
     isPlaying: Boolean,
+    isLoading: Boolean,
     onClick: (String) -> Unit,
-    onPlayEpisode: (SelectedEpisode) -> Unit,
+    onPlayEpisode: (Episode) -> Unit,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(modifier = modifier.clickable { onClick(episode.uri) }) {
@@ -250,37 +255,45 @@ fun EpisodeListItem(
             )
         }
 
-        val icon = if (isPlaying) {
-            Icons.Rounded.PauseCircleFilled
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(6.dp)
+                    .constrainAs(playIcon) {
+                        start.linkTo(parent.start, Keyline1)
+                        top.linkTo(titleImageBarrier, margin = 10.dp)
+                        bottom.linkTo(parent.bottom, 10.dp)
+                    },
+                color = MaterialTheme.colors.primary,
+            )
         } else {
-            Icons.Rounded.PlayCircleFilled
+            val icon = if (isPlaying) {
+                Icons.Rounded.PauseCircleFilled
+            } else {
+                Icons.Rounded.PlayCircleFilled
+            }
+
+            Image(
+                imageVector = icon,
+                contentDescription = stringResource(R.string.cd_play),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = rememberRipple(bounded = false, radius = 24.dp)
+                    ) { onPlayEpisode(episode) }
+                    .size(48.dp)
+                    .padding(6.dp)
+                    .semantics { role = Role.Button }
+                    .constrainAs(playIcon) {
+                        start.linkTo(parent.start, Keyline1)
+                        top.linkTo(titleImageBarrier, margin = 10.dp)
+                        bottom.linkTo(parent.bottom, 10.dp)
+                    }
+            )
         }
-        Image(
-            imageVector = icon,
-            contentDescription = stringResource(R.string.cd_play),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = Modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(bounded = false, radius = 24.dp)
-                ) {
-                    onPlayEpisode(
-                        SelectedEpisode(
-                            episode = episode,
-                            isPlaying = isPlaying.not(),
-                        )
-                    )
-                }
-                .size(48.dp)
-                .padding(6.dp)
-                .semantics { role = Role.Button }
-                .constrainAs(playIcon) {
-                    start.linkTo(parent.start, Keyline1)
-                    top.linkTo(titleImageBarrier, margin = 10.dp)
-                    bottom.linkTo(parent.bottom, 10.dp)
-                }
-        )
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
@@ -430,6 +443,7 @@ fun PreviewEpisodeListItem() {
             episode = PreviewEpisodes[0],
             podcast = PreviewPodcasts[0],
             isPlaying = false,
+            isLoading = false,
             onClick = { },
             onPlayEpisode = { },
             modifier = Modifier.fillMaxWidth()
