@@ -61,7 +61,7 @@ class PodcastCategoryViewModel @AssistedInject constructor(
                     topPodcasts = topPodcasts,
                     episodes = episodes.map {
                         val isCurrentItem = mediaState.mediaItem.displayTitle == it.episode.title
-                        EpisodeListItem(
+                        EpisodeListItemState(
                             episodeToPodcast = it,
                             isPlaying = isCurrentItem && mediaState.isPlaying,
                             isLoading = isCurrentItem && mediaState.playerState == PlayerState.BUFFERING,
@@ -107,12 +107,12 @@ class PodcastCategoryViewModel @AssistedInject constructor(
 
 data class PodcastCategoryViewState(
     val topPodcasts: List<PodcastWithExtraInfo> = emptyList(),
-    val episodes: List<EpisodeListItem> = emptyList(),
+    val episodes: List<EpisodeListItemState> = emptyList(),
 )
 
-fun PodcastCategoryViewState.isSelectedItem(title: String) = episodes.any { it.episodeToPodcast.episode.title == title }
+private fun PodcastCategoryViewState.isSelectedItem(title: String) = episodes.any { it.episodeToPodcast.episode.title == title }
 
-data class EpisodeListItem(
+data class EpisodeListItemState(
     val episodeToPodcast: EpisodeToPodcast,
     val isPlaying: Boolean = false,
     val isLoading: Boolean = false,

@@ -125,7 +125,7 @@ fun PodcastCategoryAndEpisodes(
  */
 @Composable
 private fun CategoryAndEpisodesList(
-    episodes: List<EpisodeListItem>,
+    episodes: List<EpisodeListItemState>,
     topPodcasts: List<PodcastWithExtraInfo>,
     navigateToPlayer: (String) -> Unit,
     onTogglePodcastFollowed: (String) -> Unit,
