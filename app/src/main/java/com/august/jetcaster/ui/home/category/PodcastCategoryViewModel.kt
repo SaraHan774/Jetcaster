@@ -16,8 +16,6 @@
 
 package com.august.jetcaster.ui.home.category
 
-import android.provider.MediaStore.Audio.Media
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -31,15 +29,9 @@ import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.media.PlayerState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class PodcastCategoryViewModel @AssistedInject constructor(
@@ -51,9 +43,6 @@ class PodcastCategoryViewModel @AssistedInject constructor(
 
     val state: StateFlow<PodcastCategoryViewState>
         get() = _state
-
-    private val _episodeListItemState = MutableStateFlow(EpisodeListItemState())
-    val episodeListItemState = _episodeListItemState
 
     init {
         viewModelScope.launch {
@@ -67,29 +56,24 @@ class PodcastCategoryViewModel @AssistedInject constructor(
                 limit = 20
             )
             // Combine our flows and collect them into the view state StateFlow
-            combine(recentPodcastsFlow, episodesFlow) { topPodcasts, episodes ->
+            combine(recentPodcastsFlow, episodesFlow, MediaBus.state) { topPodcasts, episodes, mediaState ->
                 PodcastCategoryViewState(
                     topPodcasts = topPodcasts,
-                    episodes = episodes
+                    episodes = episodes.map {
+                        val isCurrentItem = mediaState.mediaItem.displayTitle == it.episode.title
+                        EpisodeListItem(
+                            episodeToPodcast = it,
+                            isPlaying = isCurrentItem && mediaState.isPlaying,
+                            isLoading = isCurrentItem && mediaState.playerState == PlayerState.BUFFERING,
+                        )
+                    }
                 )
             }.collect { _state.value = it }
-        }
-
-        viewModelScope.launch {
-            MediaBus.state.collect { mediaState ->
-                _episodeListItemState.update {
-                    it.copy(
-                        selectedEpisodeTitle = mediaState.mediaItem.displayTitle.toString(),
-                        isPlaying = mediaState.isPlaying,
-                        isLoading = mediaState.playerState == PlayerState.BUFFERING,
-                    )
-                }
-            }
         }
     }
 
     fun onPlayEpisode(episode: Episode) {
-        if (episodeListItemState.value.selectedEpisodeTitle != episode.title) {
+        if (state.value.isSelectedItem(episode.title)) {
             onMediaEvent(MediaEvent.SetItem(episode.uri))
         } else {
             onMediaEvent(MediaEvent.PlayPause)
@@ -123,12 +107,13 @@ class PodcastCategoryViewModel @AssistedInject constructor(
 
 data class PodcastCategoryViewState(
     val topPodcasts: List<PodcastWithExtraInfo> = emptyList(),
-    val episodes: List<EpisodeToPodcast> = emptyList(),
+    val episodes: List<EpisodeListItem> = emptyList(),
 )
 
-data class EpisodeListItemState(
-    val selectedEpisodeTitle: String = "",
+fun PodcastCategoryViewState.isSelectedItem(title: String) = episodes.any { it.episodeToPodcast.episode.title == title }
+
+data class EpisodeListItem(
+    val episodeToPodcast: EpisodeToPodcast,
     val isPlaying: Boolean = false,
     val isLoading: Boolean = false,
 )
-

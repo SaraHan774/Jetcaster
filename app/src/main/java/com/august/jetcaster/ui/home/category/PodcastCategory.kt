@@ -75,7 +75,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.august.jetcaster.R
 import com.august.jetcaster.data.Episode
-import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.Podcast
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.di.modules.ViewModelFactoryProvider
@@ -109,15 +108,11 @@ fun PodcastCategoryAndEpisodes(
         factory = PodcastCategoryViewModel.provideFactory(factory, categoryId)
     )
     val viewState by podcastCategoryViewModel.state.collectAsStateWithLifecycle()
-    val episodeListItemState by podcastCategoryViewModel.episodeListItemState.collectAsStateWithLifecycle(
-        EpisodeListItemState()
-    )
 
     Column(modifier = modifier) {
         CategoryAndEpisodesList(
             viewState.episodes,
             viewState.topPodcasts,
-            episodeListItemState,
             navigateToPlayer,
             podcastCategoryViewModel::onTogglePodcastFollowed,
             podcastCategoryViewModel::onPlayEpisode
@@ -130,9 +125,8 @@ fun PodcastCategoryAndEpisodes(
  */
 @Composable
 private fun CategoryAndEpisodesList(
-    episodes: List<EpisodeToPodcast>,
+    episodes: List<EpisodeListItem>,
     topPodcasts: List<PodcastWithExtraInfo>,
-    episodeListItemState: EpisodeListItemState,
     navigateToPlayer: (String) -> Unit,
     onTogglePodcastFollowed: (String) -> Unit,
     onPlayEpisode: (Episode) -> Unit,
@@ -145,12 +139,14 @@ private fun CategoryAndEpisodesList(
             CategoryPodcasts(topPodcasts, onTogglePodcastFollowed)
         }
 
-        items(episodes, key = { it.episode.uri }) { item ->
+        items(episodes, key = { it.episodeToPodcast.episode.uri }) { item ->
+            val episode = item.episodeToPodcast.episode
+            val podcast = item.episodeToPodcast.podcast
             EpisodeListItem(
-                episode = item.episode,
-                podcast = item.podcast,
-                isPlaying = item.episode.title == episodeListItemState.selectedEpisodeTitle && episodeListItemState.isPlaying,
-                isLoading = item.episode.title == episodeListItemState.selectedEpisodeTitle && episodeListItemState.isLoading,
+                episode = episode,
+                podcast = podcast,
+                isPlaying = item.isPlaying,
+                isLoading = item.isLoading,
                 onClick = navigateToPlayer,
                 onPlayEpisode = onPlayEpisode,
                 modifier = Modifier.fillParentMaxWidth()
