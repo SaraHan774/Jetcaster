@@ -34,6 +34,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -45,6 +46,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.PlaylistAdd
+import androidx.compose.material.icons.rounded.PauseCircleFilled
 import androidx.compose.material.icons.rounded.PlayCircleFilled
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
@@ -73,7 +75,6 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.august.jetcaster.R
 import com.august.jetcaster.data.Episode
-import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.Podcast
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.di.modules.ViewModelFactoryProvider
@@ -89,9 +90,9 @@ import java.time.format.FormatStyle
 
 @Composable
 fun PodcastCategoryAndEpisodes(
+    modifier: Modifier = Modifier,
     categoryId: Long,
     navigateToPlayer: (String) -> Unit,
-    modifier: Modifier = Modifier
 ) {
     val factory = EntryPointAccessors.fromActivity(
         LocalContext.current.findActivity(),
@@ -102,18 +103,19 @@ fun PodcastCategoryAndEpisodes(
      * CategoryEpisodeListViewModel requires the category as part of it's constructor, therefore
      * we need to assist with it's instantiation with a custom factory and custom key.
      */
-    val viewModel: PodcastCategoryViewModel = viewModel(
+    val podcastCategoryViewModel: PodcastCategoryViewModel = viewModel(
         key = "category_list_$categoryId",
         factory = PodcastCategoryViewModel.provideFactory(factory, categoryId)
     )
-    val viewState by viewModel.state.collectAsStateWithLifecycle()
+    val viewState by podcastCategoryViewModel.state.collectAsStateWithLifecycle()
 
     Column(modifier = modifier) {
         CategoryAndEpisodesList(
             viewState.episodes,
             viewState.topPodcasts,
             navigateToPlayer,
-            viewModel::onTogglePodcastFollowed,
+            podcastCategoryViewModel::onTogglePodcastFollowed,
+            podcastCategoryViewModel::onPlayEpisode
         )
     }
 }
@@ -123,10 +125,11 @@ fun PodcastCategoryAndEpisodes(
  */
 @Composable
 private fun CategoryAndEpisodesList(
-    episodes: List<EpisodeToPodcast>,
+    episodes: List<EpisodeListItemState>,
     topPodcasts: List<PodcastWithExtraInfo>,
     navigateToPlayer: (String) -> Unit,
     onTogglePodcastFollowed: (String) -> Unit,
+    onPlayEpisode: (Episode) -> Unit,
 ) {
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
@@ -136,11 +139,16 @@ private fun CategoryAndEpisodesList(
             CategoryPodcasts(topPodcasts, onTogglePodcastFollowed)
         }
 
-        items(episodes, key = { it.episode.uri }) { item ->
+        items(episodes, key = { it.episodeToPodcast.episode.uri }) { item ->
+            val episode = item.episodeToPodcast.episode
+            val podcast = item.episodeToPodcast.podcast
             EpisodeListItem(
-                episode = item.episode,
-                podcast = item.podcast,
+                episode = episode,
+                podcast = podcast,
+                isPlaying = item.isPlaying,
+                isLoading = item.isLoading,
                 onClick = navigateToPlayer,
+                onPlayEpisode = onPlayEpisode,
                 modifier = Modifier.fillParentMaxWidth()
             )
         }
@@ -163,7 +171,10 @@ private fun CategoryPodcasts(
 fun EpisodeListItem(
     episode: Episode,
     podcast: Podcast,
+    isPlaying: Boolean,
+    isLoading: Boolean,
     onClick: (String) -> Unit,
+    onPlayEpisode: (Episode) -> Unit,
     modifier: Modifier = Modifier
 ) {
     ConstraintLayout(modifier = modifier.clickable { onClick(episode.uri) }) {
@@ -240,25 +251,45 @@ fun EpisodeListItem(
             )
         }
 
-        Image(
-            imageVector = Icons.Rounded.PlayCircleFilled,
-            contentDescription = stringResource(R.string.cd_play),
-            contentScale = ContentScale.Fit,
-            colorFilter = ColorFilter.tint(LocalContentColor.current),
-            modifier = Modifier
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = rememberRipple(bounded = false, radius = 24.dp)
-                ) { /* TODO */ }
-                .size(48.dp)
-                .padding(6.dp)
-                .semantics { role = Role.Button }
-                .constrainAs(playIcon) {
-                    start.linkTo(parent.start, Keyline1)
-                    top.linkTo(titleImageBarrier, margin = 10.dp)
-                    bottom.linkTo(parent.bottom, 10.dp)
-                }
-        )
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(6.dp)
+                    .constrainAs(playIcon) {
+                        start.linkTo(parent.start, Keyline1)
+                        top.linkTo(titleImageBarrier, margin = 10.dp)
+                        bottom.linkTo(parent.bottom, 10.dp)
+                    },
+                color = MaterialTheme.colors.primary,
+            )
+        } else {
+            val icon = if (isPlaying) {
+                Icons.Rounded.PauseCircleFilled
+            } else {
+                Icons.Rounded.PlayCircleFilled
+            }
+
+            Image(
+                imageVector = icon,
+                contentDescription = stringResource(R.string.cd_play),
+                contentScale = ContentScale.Fit,
+                colorFilter = ColorFilter.tint(LocalContentColor.current),
+                modifier = Modifier
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = rememberRipple(bounded = false, radius = 24.dp)
+                    ) { onPlayEpisode(episode) }
+                    .size(48.dp)
+                    .padding(6.dp)
+                    .semantics { role = Role.Button }
+                    .constrainAs(playIcon) {
+                        start.linkTo(parent.start, Keyline1)
+                        top.linkTo(titleImageBarrier, margin = 10.dp)
+                        bottom.linkTo(parent.bottom, 10.dp)
+                    }
+            )
+        }
 
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
@@ -407,7 +438,10 @@ fun PreviewEpisodeListItem() {
         EpisodeListItem(
             episode = PreviewEpisodes[0],
             podcast = PreviewPodcasts[0],
+            isPlaying = false,
+            isLoading = false,
             onClick = { },
+            onPlayEpisode = { },
             modifier = Modifier.fillMaxWidth()
         )
     }
