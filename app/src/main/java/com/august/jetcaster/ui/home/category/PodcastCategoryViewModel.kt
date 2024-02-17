@@ -73,7 +73,7 @@ class PodcastCategoryViewModel @AssistedInject constructor(
     }
 
     fun onPlayEpisode(episode: Episode) {
-        if (state.value.isSelectedItem(episode.title)) {
+        if (MediaBus.state.value.mediaItem.displayTitle != episode.title) {
             onMediaEvent(MediaEvent.SetItem(episode.uri))
         } else {
             onMediaEvent(MediaEvent.PlayPause)
@@ -109,8 +109,6 @@ data class PodcastCategoryViewState(
     val topPodcasts: List<PodcastWithExtraInfo> = emptyList(),
     val episodes: List<EpisodeListItemState> = emptyList(),
 )
-
-private fun PodcastCategoryViewState.isSelectedItem(title: String) = episodes.any { it.episodeToPodcast.episode.title == title }
 
 data class EpisodeListItemState(
     val episodeToPodcast: EpisodeToPodcast,
