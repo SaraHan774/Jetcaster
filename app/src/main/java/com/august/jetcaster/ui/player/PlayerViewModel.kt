@@ -21,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.august.jetcaster.media.JetMediaController
 import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.media.PlayerState
@@ -46,7 +47,9 @@ data class PlayerUiState(
  * ViewModel that handles the business logic and screen state of the Player screen
  */
 @HiltViewModel
-class PlayerViewModel @Inject constructor() : ViewModel() {
+class PlayerViewModel @Inject constructor(
+    private val mediaController: JetMediaController
+) : ViewModel() {
 
     var uiState by mutableStateOf(PlayerUiState(isLoading = true))
         private set
@@ -69,6 +72,11 @@ class PlayerViewModel @Inject constructor() : ViewModel() {
     }
 
     fun onMediaEvent(event: MediaEvent) {
-        MediaBus.sendEvent(event)
+        mediaController.onMediaEvent(event)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mediaController.cleanup()
     }
 }

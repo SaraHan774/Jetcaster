@@ -21,6 +21,7 @@ import androidx.lifecycle.viewModelScope
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
 import com.august.jetcaster.data.PodcastsRepository
+import com.august.jetcaster.media.JetMediaController
 import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.media.PlayerState
@@ -41,6 +42,7 @@ import javax.inject.Inject
 class HomeViewModel @Inject constructor(
     private val podcastsRepository: PodcastsRepository,
     private val podcastStore: PodcastStore,
+    private val mediaController: JetMediaController
 ) : ViewModel() {
     // Holds our currently selected home category
     private val selectedCategory = MutableStateFlow(HomeCategory.Discover)
@@ -112,7 +114,7 @@ class HomeViewModel @Inject constructor(
     }
 
     fun onMediaEvent(event: MediaEvent) {
-        MediaBus.sendEvent(event)
+        mediaController.onMediaEvent(event)
     }
 
     private fun collectMediaState() {
@@ -129,6 +131,11 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mediaController.cleanup()
     }
 }
 
