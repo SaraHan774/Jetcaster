@@ -2,27 +2,14 @@ package com.august.jetcaster.media
 
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
 object MediaBus {
 
-    private val _events = MutableSharedFlow<MediaEvent>(
-        replay = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val events = _events.asSharedFlow()
-
     private val _state = MutableStateFlow(MediaState.INITIAL)
     val state = _state.asStateFlow()
-
-    fun sendEvent(event: MediaEvent) {
-        _events.tryEmit(event)
-    }
 
     fun updateState(newState: MediaState) {
         _state.update { newState }
