@@ -76,6 +76,8 @@ class JetcasterMediaService : MediaSessionService(), Player.Listener {
             release()
         }
         coroutineScope.cancel()
+        // Temporary: Reset media state
+        MediaBus.updateState { MediaState.INITIAL }
         super.onDestroy()
     }
 
