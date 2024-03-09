@@ -11,17 +11,16 @@ import com.august.jetcaster.media.NotificationManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ServiceComponent
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import dagger.hilt.android.scopes.ServiceScoped
 
-// NOTE: Later should be part be a Hilt Module.
 
 @Module
-@InstallIn(SingletonComponent::class)
+@InstallIn(ServiceComponent::class)
 object MediaModule {
 
-    @Singleton
+    @ServiceScoped
     @Provides
     fun provideAudioAttributes(): AudioAttributes = AudioAttributes.Builder()
         .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
@@ -29,7 +28,7 @@ object MediaModule {
         .build()
 
     @UnstableApi
-    @Singleton
+    @ServiceScoped
     @Provides
     fun providePlayer(
         @ApplicationContext context: Context,
@@ -42,7 +41,7 @@ object MediaModule {
         .setSeekForwardIncrementMs(30 * 1_000)
         .build()
 
-    @Singleton
+    @ServiceScoped
     @Provides
     fun provideNotificationManager(
         @ApplicationContext context: Context,
@@ -50,7 +49,7 @@ object MediaModule {
     ): NotificationManager = NotificationManager(context, player)
 
     @UnstableApi
-    @Singleton
+    @ServiceScoped
     @Provides
     fun provideMediaSession(
         @ApplicationContext context: Context,

@@ -24,6 +24,7 @@ import com.august.jetcaster.data.Episode
 import com.august.jetcaster.data.EpisodeToPodcast
 import com.august.jetcaster.data.PodcastStore
 import com.august.jetcaster.data.PodcastWithExtraInfo
+import com.august.jetcaster.media.JetMediaController
 import com.august.jetcaster.media.MediaBus
 import com.august.jetcaster.media.MediaEvent
 import com.august.jetcaster.media.PlayerState
@@ -38,6 +39,7 @@ class PodcastCategoryViewModel @AssistedInject constructor(
     @Assisted val categoryId: Long,
     categoryStore: CategoryStore,
     val podcastStore: PodcastStore,
+    private val mediaController: JetMediaController
 ) : ViewModel() {
     private val _state = MutableStateFlow(PodcastCategoryViewState())
 
@@ -87,7 +89,12 @@ class PodcastCategoryViewModel @AssistedInject constructor(
     }
 
     private fun onMediaEvent(mediaEvent: MediaEvent) {
-        MediaBus.sendEvent(mediaEvent)
+        mediaController.onMediaEvent(mediaEvent)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        mediaController.cleanup()
     }
 
     companion object {

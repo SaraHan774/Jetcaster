@@ -14,6 +14,10 @@ import javax.inject.Singleton
 @Qualifier
 annotation class ApplicationScope
 
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class MediaControllerScope
+
 @InstallIn(SingletonComponent::class)
 @Module
 object CoroutineScopesModule {
@@ -23,4 +27,8 @@ object CoroutineScopesModule {
     @Provides
     fun provideDefaultCoroutineScope(@DefaultDispatcher defaultDispatcher: CoroutineDispatcher) =
         CoroutineScope(SupervisorJob() + defaultDispatcher)
+
+    @MediaControllerScope
+    @Provides
+    fun provideMcCoroutineScope() = CoroutineScope(SupervisorJob())
 }
