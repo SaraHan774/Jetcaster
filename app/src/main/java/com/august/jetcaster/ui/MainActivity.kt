@@ -41,7 +41,12 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge(
             // This app is only ever in dark mode, so hard code detectDarkMode to true.
-            SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT, detectDarkMode = { true })
+            statusBarStyle = SystemBarStyle.auto(
+                Color.TRANSPARENT, Color.TRANSPARENT, detectDarkMode = { true }
+            ),
+            navigationBarStyle = SystemBarStyle.auto(
+                Color.TRANSPARENT, Color.TRANSPARENT, detectDarkMode = { true }
+            )
         )
 
         setContent {

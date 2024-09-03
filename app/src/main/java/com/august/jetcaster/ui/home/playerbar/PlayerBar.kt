@@ -4,12 +4,14 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -37,19 +39,20 @@ fun PlayerBar(
     ) {
         Row(
             modifier = modifier
-                .padding(
-                    bottom = WindowInsets.navigationBars
-                        .asPaddingValues()
-                        .calculateBottomPadding()
+                .windowInsetsPadding(
+                    WindowInsets.navigationBars.only(WindowInsetsSides.Horizontal)
                 )
-                .height(76.dp)
-                .fillMaxWidth()
                 .verticalGradientScrim(
                     color = MaterialTheme.colors.primary,
-                    decay = 0.1f,
+                    decay = 0f,
                     startYPercentage = 1f,
                     endYPercentage = 0f
                 )
+                .windowInsetsPadding(
+                    WindowInsets.navigationBars.only(WindowInsetsSides.Vertical)
+                )
+                .height(76.dp)
+                .fillMaxWidth()
                 .padding(
                     start = 8.dp,
                     end = 8.dp
